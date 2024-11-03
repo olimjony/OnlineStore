@@ -1,0 +1,29 @@
+dotnet new sln -o OnlineStore // creating a solution 
+dotnet new webpi -o OnlineStore.Api // webapi
+dotnet new webpi -o OnlineStore.Api // classlib
+dotnet sln add (ls -r **\*.csproj)
+dotnet add .\OnlineStore.Api\ reference .\OnlineStore.Contracts\ .\OnlineStore.Application\ // Api knows about Contracts Api->Contracts
+dotnet add .\OnlineStore.Infrastructure\ reference .\OnlineStore.Application\ Infrastructure->Application
+dotnet add .\OnlineStore.Application\ reference .\OnlineStore.Domain\ Application->Domain
+dotnet add .\OnlineStore.Api\ reference .\OnlineStore.Infrastructure\ Api->Infrastructure
+dotnet run --project .\OnlineStore.Api\
+
+// for creating migration
+dotnet ef migrations add InitialMigration --project .\OnlineStore.Infrastructure\ --startup-project .\OnlineStore.Api\
+// for creating database
+dotnet ef database update --project .\OnlineStore.Infrastructure\ --startup-project .\OnlineStore.Api\
+
+Core, Domain -> Entities or Models, Aggregates, Value Objects, Interfaces, Domain Services, Domain Exceptions,
+Domain Events, Event Handlers, Specifications, Validators, Enums, Custom Guards
+
+
+Use Cases, Application -> Commands, Queries, DTOs, Behaviors, Command Handlers, Query Handlers
+
+Repositories, Infrasturcture -> Repositories, DBContext, Cached Repositories, Api Clients, File System Accessors, Azure Storage Accessors, Emailing Implementation, SMS Implementation, System Clock, Other Services, (Interfaces)
+
+WebApi -> API Endpoints, API Models, Filters, Model Binders, Tag Helpers, Razor Pages, ViewModels, Controllers, Views, Other Services, Interfaces, Composition Root
+
+
+
+
+dotnet ef migrations add LastMigration --project .\OnlineStore.Infrastructure\ --startup-project .\OnlineStore.Api\
