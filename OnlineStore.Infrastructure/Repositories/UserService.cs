@@ -1,8 +1,11 @@
+using System.Net;
+using System.Runtime.InteropServices;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using OnlineStore.Application.DTOs;
 using OnlineStore.Application.Interfaces;
+using OnlineStore.Application.Responses;
 using OnlineStore.Domain.Entities;
 using OnlineStore.Infrastructure.Persistence;
 
@@ -13,37 +16,29 @@ public class UserService(DataContext dataContext, IMapper mapper) : IUserService
     private readonly DataContext _dataContext = dataContext;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<ProductDTO?> GetProductById(int id){
+    public async Task<Response<AllProductInfoDTO?>> GetProductById(int id){
         var product = await _dataContext.Products.Where(x => x.Id == id).FirstOrDefaultAsync();
-        if(product is null) return null;
-        else{
-            return new ProductDTO(){
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,                
-                MarketplaceId = product.MarketplaceId
-            };
-        }
+        
+        if(product is null) return new Response<AllProductInfoDTO?>(HttpStatusCode.Accepted, "Product is unavailable!!");
+
+        return new Response<AllProductInfoDTO?>(_mapper.Map<AllProductInfoDTO>(product));
     }
-    public async Task<List<ProductDTO>> GetAllProducts(){
+    public async Task<Response<List<AllProductDTO?>>> GetAllProducts(){
         var products = await _dataContext.Products.ToListAsync();
-        if(products is null) return null!;
-        else return _mapper.Map<List<ProductDTO>>(products);
+        if(products is null) return new Response<List<AllProductDTO?>>(HttpStatusCode.BadRequest, "No products are available!");
+        
+        return new Response<List<AllProductDTO?>>(_mapper.Map<List<AllProductDTO?>>(products));
     }
 
-    public async Task<UserProfile> GetAllMyInfo(int id){
-        var fullInfo = await _dataContext.UserProfiles.Where(x => x.Id == id)
-            .Include(x => x.User)
-                .ThenInclude(x => x.Carts)
-                    .ThenInclude(x => x.CartProducts)
-            .Include(x => x.Seller)
-                .ThenInclude(x => x!.Marketplaces)
-                    .ThenInclude(x => x.Products)
+    public async Task<Response<UserProfile?>> GetAccountInfo(int id)
+    {
+        var fullInfo = await _dataContext.UserProfiles
+            .Where(x => x.Id == id)
             .Include(x => x.UserRoles)
-            .FirstOrDefaultAsync();
-        return fullInfo!;
-    } 
-
+        .FirstOrDefaultAsync();
+        
+        if(fullInfo is null)
+            return new Response<UserProfile?>(HttpStatusCode.BadRequest, "Likely not authorized!");
+        return new Response<UserProfile?>(fullInfo);
+    }
 }

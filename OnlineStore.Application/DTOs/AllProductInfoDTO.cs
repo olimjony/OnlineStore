@@ -1,6 +1,6 @@
 namespace OnlineStore.Application.DTOs;
 
-public class ProductDTO
+public class AllProductInfoDTO
 {
     public int Id { get; set; }
     public string Name { get; set; } = default!;
@@ -13,6 +13,6 @@ public class ProductDTO
     public int CategoryId { get; set; }
 
     public string ProductIcon { get; set; } = null!; 
-    public List<ProductImageDTO?> ProductImages { get; set; } = new List<ProductImageDTO>();    
+    public List<ProductImageDTO?> ProductImages { get; set; } = new List<ProductImageDTO?>();    
     public List<ProductAttributeDTO> Attributes { get; set; } = new List<ProductAttributeDTO>();
 }

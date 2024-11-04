@@ -9,6 +9,8 @@ namespace OnlineStore.Application.Mapping
         public Automapper()
         {
             CreateMap<Product, ProductDTO>().ReverseMap();
+            CreateMap<Product, AllProductInfoDTO>().ReverseMap();
+            CreateMap<Product, AllProductDTO>().ReverseMap();
             CreateMap<Marketplace, MarketplaceDTO>();
             CreateMap<Cart, CartDTO>();
             CreateMap<CartProduct, CartProductDTO>()
