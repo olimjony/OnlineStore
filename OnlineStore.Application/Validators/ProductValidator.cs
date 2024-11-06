@@ -3,7 +3,7 @@ using OnlineStore.Application.DTOs;
 
 namespace OnlineStore.Application.Validators;
 
-public class ProductValidator : AbstractValidator<ProductDTO>
+public class ProductValidator : AbstractValidator<CreateProductDTO>
 {
     public ProductValidator()
     {

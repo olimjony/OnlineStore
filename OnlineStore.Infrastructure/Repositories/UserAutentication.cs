@@ -129,4 +129,9 @@ public class UserAutentication : IUserAuthentication
         var tokenString = securityTokenHandler.WriteToken(token);
         return tokenString!;
     }
+
+    public async Task<Response<string>> ForgotPassword(string EmailAddress)
+    {
+        throw new NotImplementedException();
+    }
 }

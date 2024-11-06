@@ -1,5 +1,6 @@
 using System.Net;
 using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using OnlineStore.Application.DTOs;
 using OnlineStore.Application.Interfaces;
@@ -11,7 +12,7 @@ namespace OnlineStore.Infrastructure.Repositories;
 
 public class ProductService(DataContext _dataContext, IMapper _mapper) : IProductService
 {
-    public async Task<Response<string>> CreateProduct(int userProfileId, int marketplaceId, ProductDTO productDTO) {
+    public async Task<Response<string>> CreateProduct(int userProfileId, int marketplaceId, CreateProductDTO productDTO) {
         var seller = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
             .Include(s => s.Marketplaces)
@@ -30,16 +31,23 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
             StockQuantity = productDTO.StockQuantity,
             SKU = "a",
             CategoryId = productDTO.CategoryId,
-            ProductIcon = productDTO.ProductIcon,
+            ProductImages = new List<ProductImage>(),
             Attributes = productDTO.Attributes.Select( x =>
                 new ProductAttribute(){Value = x.Value, CategoryAttributeId = x.CategoryAttributeId})
-                    .ToList(),
-            ProductImages = productDTO.ProductImages.Select( x =>
-                new ProductImage(){ImageUrl = x.ImageUrl, IsPrimary = x.IsPrimary})
-                    .ToList(),
+            .ToList(),
         };
 
-        await _dataContext.Products.AddAsync(product);
+        if (productDTO.ProductIcon != null) {
+            var iconFilePath = await SaveFileAsync(productDTO.ProductIcon);
+            product.ProductIcon = iconFilePath;
+        }
+
+        foreach (var image in productDTO.ProductImages) {
+            var imagePath = await SaveFileAsync(image);
+            product.ProductImages.Add(new ProductImage { ImageUrl = imagePath });
+        }
+
+        _dataContext.Products.Add(product);
         await _dataContext.SaveChangesAsync();
 
         return new Response<string>(HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");
@@ -99,8 +107,7 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
         return new Response<ProductDTO?>(_mapper.Map<ProductDTO>(product));
     }
 
-    // NOt best way to update the product but for now we say it's ok!
-    public async Task<Response<string>> UpdateProduct(int userProfileId, int marketplaceId,  ProductDTO productDTO)
+    public async Task<Response<string>> UpdateProduct(int userProfileId, int marketplaceId, int productId, CreateProductDTO productDTO)
     {
         var seller = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
@@ -113,7 +120,7 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
         var marketplace = seller.Marketplaces.FirstOrDefault(x => x.Id == marketplaceId);
         if(marketplace is null) return new Response<string>(HttpStatusCode.BadRequest, "The marketplace was not found!");
 
-        var product = marketplace.Products.FirstOrDefault(x => x.Id == productDTO.Id);
+        var product = marketplace.Products.FirstOrDefault(x => x.Id == productId);
         if(product is null) return new Response<string>(HttpStatusCode.BadRequest, "product wasn't found!");
 
         product.Name = productDTO.Name;
@@ -123,10 +130,29 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
         product.StockQuantity = productDTO.StockQuantity;
         product.SKU = "a";
         product.CategoryId = productDTO.CategoryId;
-        product.ProductIcon = productDTO.ProductIcon;
-
-        await _dataContext.SaveChangesAsync();
+        
+        if (productDTO.ProductIcon != null) {
+            var iconFilePath = await SaveFileAsync(productDTO.ProductIcon);
+            product.ProductIcon = iconFilePath;
+        }
 
         return new Response<string>(HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");    
     }
+    
+    private async Task<string> SaveFileAsync(IFormFile file)
+{
+    var uploadsDirectory = Path.Combine("wwwroot", "uploads", "productsImages");
+    if (!Directory.Exists(uploadsDirectory))
+        Directory.CreateDirectory(uploadsDirectory);
+
+    var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+    var filePath = Path.Combine(uploadsDirectory, fileName);
+
+    using (var fileStream = new FileStream(filePath, FileMode.Create))
+    {
+        await file.CopyToAsync(fileStream);
+    }
+
+    return $"/uploads/products/{fileName}";
+}
 }

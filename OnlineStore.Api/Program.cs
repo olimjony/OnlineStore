@@ -5,14 +5,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using OnlineStore.Api.Swagger;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
+
 builder.Services.AddSwaggerGen(c =>
 {
+    c.OperationFilter<FileUploadOperationFilter>();
     c.CustomSchemaIds(type => type.ToString());
     c.SwaggerDoc("v1", new OpenApiInfo {
         Title = "Web Api",
@@ -51,6 +54,7 @@ builder.Services.AddSwaggerGen(c =>
     }});
 });
 
+
 var key = builder.Configuration["JWT:Key"];
 
 builder.Services.AddAuthentication(x => {
@@ -84,7 +88,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.MapControllers();
 

@@ -8,6 +8,6 @@ public interface IUserAuthentication
     public Task<Response<string>> Register(UserRegisterDTO userRegisterDTO);
     public Task<Response<string>> Login(UserLoginDTO userLoginDTO);
     public Task<Response<string>> EnableSeller(int Id);
-    //Task<Response<string>> ForgotPasswordCodeGenerator(ForgotPasswordDTO forgotPasswordDTO);
+    public Task<Response<string>> ForgotPassword(string EmailAddress);
     //Task<Response<string>> ChangePassword(ChangePasswordDTO passwordDTO, int userId);
 }

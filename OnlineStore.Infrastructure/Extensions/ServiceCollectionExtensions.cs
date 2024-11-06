@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
         services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>(); 
         services.AddScoped<IValidator<MarketplaceDTO>, MarketplaceValidator>();
-        services.AddScoped<IValidator<ProductDTO>, ProductValidator>();
+        services.AddScoped<IValidator<CreateProductDTO>, ProductValidator>();
         services.AddScoped<IValidator<CartDTO>, CartValidator>();
         services.AddAutoMapper(typeof(Automapper));
         services.AddScoped<IUserAuthentication, UserAutentication>();

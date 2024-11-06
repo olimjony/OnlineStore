@@ -43,7 +43,7 @@ public class ProductServiceController(IProductService _productService) : Control
         }
 
     [HttpPost("create-product{marketplaceId}")]
-        public async Task<ActionResult<string>> CreateProduct([FromBody] ProductDTO productDTO,int marketplaceId)
+        public async Task<ActionResult<string>> CreateProduct([FromForm] CreateProductDTO productDTO, int marketplaceId)
         {
             var validator = new ProductValidator();
             var validationResult = validator.Validate(productDTO);
@@ -74,7 +74,7 @@ public class ProductServiceController(IProductService _productService) : Control
         }
 
     [HttpPut("update-product{marketplaceId}/{productId}")]
-        public async Task<ActionResult<string>> UpdateProduct([FromBody] ProductDTO productDTO, int marketplaceId)
+        public async Task<ActionResult<string>> UpdateProduct([FromBody] CreateProductDTO productDTO, int marketplaceId, int productId)
         {
             var validator = new ProductValidator();
             var validationResult = validator.Validate(productDTO);
@@ -82,7 +82,7 @@ public class ProductServiceController(IProductService _productService) : Control
 
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _productService.UpdateProduct(userProfileId, marketplaceId, productDTO);
+            var response = await _productService.UpdateProduct(userProfileId, marketplaceId, productId, productDTO);
             if(response.StatusCode == 200)
                 return Ok(response.Errors);
             return BadRequest(response.Errors);

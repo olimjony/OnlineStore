@@ -9,6 +9,9 @@ public class Product
     public int StockQuantity { get; set; } 
     public string SKU { get; set; } = default!;
 
+    public DateTime CreatedDate { get; set; }
+    public DateTime UpdatedDate { get; set; }
+
     public int MarketplaceId { get; set; }
     public Marketplace Marketplace { get; set; } = null!;
 
