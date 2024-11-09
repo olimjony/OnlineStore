@@ -12,5 +12,5 @@ public class CartProductDTO
     public int CartId { get; set; }
     
     public int ProductId { get; set; }
-    public ProductDTO ProductDTO { get; set; } = null!;
+    public AllProductInfoDTO ProductDTO { get; set; } = null!;
 }

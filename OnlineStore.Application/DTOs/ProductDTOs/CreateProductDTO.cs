@@ -12,7 +12,7 @@ public class CreateProductDTO
     public int CategoryId { get; set; }
     public int MarketplaceId { get; set; }
 
-    public IFormFile ProductIcon { get; set; } = null!;
+    public IFormFile ProductIconURL { get; set; } = null!;
     public List<IFormFile> ProductImages { get; set; } = new();
     public List<ProductAttributeDTO> Attributes { get; set; } = new();
 }

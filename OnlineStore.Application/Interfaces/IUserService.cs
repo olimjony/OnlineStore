@@ -6,6 +6,6 @@ namespace OnlineStore.Application.Interfaces;
 
 public interface IUserService{
     public Task<Response<AllProductInfoDTO?>> GetProductById(int id);
-    public Task<Response<List<AllProductDTO?>>> GetAllProducts();
+    public Task<Response<List<GetProductDTO?>>> GetAllProducts();
     public Task<Response<UserProfile?>> GetAccountInfo(int id);
 }

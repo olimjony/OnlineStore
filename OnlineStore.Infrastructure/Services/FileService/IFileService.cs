@@ -4,6 +4,6 @@ namespace Infrastructure.Services.FileService;
 
 public interface IFileService
 {
-    Task<string> CreateFile(IFormFile file);
-    bool DeleteFile(string file);
+    public Task<string> SaveFileAsync(IFormFile file);
+    public bool DeleteFile(string file);
 }

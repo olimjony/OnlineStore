@@ -16,6 +16,12 @@ public class HashService() : IHashService
             builder.Append(t.ToString("x2"));
         }
         return builder.ToString();
+    }
 
+    public bool VerifyHash(string rawData, string expectedHash)
+    {
+        var hashOfInput = ConvertToHash(rawData);
+
+        return StringComparer.OrdinalIgnoreCase.Compare(hashOfInput, expectedHash) == 0;
     }
 }

@@ -3,11 +3,11 @@ using MailKit.Net.Smtp;
 using MimeKit;
 using MimeKit.Text;
 
-namespace Infrastructure.Services.EmailService;
+namespace OnlineStore.Infrastructure.Services.EmailService;
 
 public class EmailService(EmailConfiguration configuration) : IEmailService
 {
-    public async Task SendEmail(EmailMessageDto message, TextFormat format )
+    public async Task SendEmail(EmailMessageDto message, TextFormat format)
     {
         var emailMessage = CreateEmailMessage(message, format);
         await SendAsync(emailMessage);
@@ -17,7 +17,6 @@ public class EmailService(EmailConfiguration configuration) : IEmailService
     {
         var emailMessage = new MimeMessage();
 
-        
         emailMessage.From.Add(new MailboxAddress("mail", configuration.From));
         emailMessage.To.AddRange(message.To);
         emailMessage.Subject = message.Subject;
@@ -29,18 +28,14 @@ public class EmailService(EmailConfiguration configuration) : IEmailService
     private async Task SendAsync(MimeMessage mailMessage)
     {
         using var client = new SmtpClient();
-        try
-        {
-            await client.ConnectAsync(configuration.SmtpServer, configuration.Port, true);
-            client.AuthenticationMechanisms.Remove("OAUTH2");
-            await client.AuthenticateAsync(configuration.UserName, configuration.Password);
+        
+        await client.ConnectAsync(configuration.SmtpServer, configuration.Port, true);
+        client.AuthenticationMechanisms.Remove("OAUTH2");
+        await client.AuthenticateAsync(configuration.UserName, configuration.Password);
 
-            await client.SendAsync(mailMessage);
-        }
-        finally
-        {
-            await client.DisconnectAsync(true);
-            client.Dispose();
-        }
+        await client.SendAsync(mailMessage);
+        await client.DisconnectAsync(true);
+        
+        client.Dispose();
     }
 }

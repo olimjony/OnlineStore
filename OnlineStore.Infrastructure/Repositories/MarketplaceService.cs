@@ -6,46 +6,54 @@ using OnlineStore.Application.Responses;
 using OnlineStore.Infrastructure.Persistence;
 using OnlineStore.Domain.Entities;
 using AutoMapper;
+using Infrastructure.Services.FileService;
 
 namespace OnlineStore.Infrastructure.Repositories;
 
-public class MarketplaceService(DataContext _dataContext, IMapper _mapper) : IMarketplaceService
+public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFileService _fileService) : IMarketplaceService
 {
-    public async Task<Response<List<MarketplaceDTO?>>> GetAllMarketplaces(int userProfileId){
+    public async Task<Response<List<GetMarketplaceDTO?>>> GetAllMarketplaces(int userProfileId){
         var marketplaces = await _dataContext.Sellers.Where(x => x.UserProfileId == userProfileId)
             .Include(x => x.Marketplaces)
             .SelectMany(x => x.Marketplaces)
         .ToListAsync();
 
         if (marketplaces is null)
-            return new Response<List<MarketplaceDTO?>>(HttpStatusCode.BadRequest, "Unable to process request!");
+            return new Response<List<GetMarketplaceDTO?>>(HttpStatusCode.BadRequest, "Unable to process request!");
 
-        var marketplacesResponse = _mapper.Map<List<MarketplaceDTO?>>(marketplaces);
-        return new Response<List<MarketplaceDTO?>>(marketplacesResponse);      
+        var marketplacesResponse = _mapper.Map<List<GetMarketplaceDTO?>>(marketplaces);
+        return new Response<List<GetMarketplaceDTO?>>(marketplacesResponse);      
     }
 
-    public async Task<Response<string>> CreateMarketplace(MarketplaceDTO marketplaceDTO, int userProfileId){
-        var userProfile = await _dataContext.UserProfiles
-            .Where(x => x.Id == userProfileId)
-            .Include(x => x.Seller)
-            .FirstOrDefaultAsync();
+    public async Task<Response<string>> CreateMarketplace(int userProfileId, CreateMarketplaceDTO marketplaceDTO){
+        var seller = await _dataContext.Sellers
+            .Where(x => x.UserProfileId == userProfileId)
+        .FirstOrDefaultAsync();
 
-        if(userProfile is null) return new Response<string>(HttpStatusCode.BadRequest, "Unable to create marketplace!"); 
-        
-        var seller = userProfile.Seller;
-        if(seller is null) return new Response<string>(HttpStatusCode.BadRequest, "Associated seller was not found!");
+        if(seller is null)
+            return new Response<string>(HttpStatusCode.BadRequest, "Associated seller was not found!");
         
         var marketplace = new Marketplace(){
-            Description = marketplaceDTO.Description,
             Name = marketplaceDTO.Name,
-            ImageURL = marketplaceDTO.ImageURL,
-            SellerId = userProfile.Seller!.Id
+            Description = marketplaceDTO.Description,
+            SellerId = seller.Id
         };
+
+        if(marketplace.IconURL != null){
+            var iconFilePath = await _fileService.SaveFileAsync(marketplaceDTO.IconURL);
+            marketplace.IconURL = iconFilePath;
+        }
+        if(marketplace.ImageURL != null){
+            var imageFilePath = await _fileService.SaveFileAsync(marketplaceDTO.ImageURL);
+            marketplace.ImageURL = imageFilePath;
+        }
         
-        await _dataContext.Marketplaces.AddAsync(marketplace);
+        
+        _dataContext.Marketplaces.Add(marketplace);
         await _dataContext.SaveChangesAsync();
         
-        return new Response<string>(HttpStatusCode.OK, $"You have successfully created a marketplace named {marketplace.Name}");
+        return new Response<string>
+            (HttpStatusCode.OK, $"You have successfully created a marketplace named {marketplace.Name}");
 
     }
     public async Task<Response<string>> DeleteMarketplace(int userProfileId, int marketplaceId){
@@ -54,47 +62,58 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper) : IMa
             .SelectMany(s => s.Marketplaces)
         .FirstOrDefaultAsync(m => m.Id == marketplaceId);
 
-        if(marketplace is null){
+        if(marketplace is null)
             return new Response<string>(HttpStatusCode.BadRequest, "The current marketplace doesnt exist!!");
-        }
 
         _dataContext.Marketplaces.Remove(marketplace);
         await _dataContext.SaveChangesAsync();
 
-        return new Response<string>(HttpStatusCode.OK, $"The {marketplace.Name} was deleted successfully!");
+        return new Response<string>
+            (HttpStatusCode.OK, $"The {marketplace.Name} was deleted successfully!");
     }
 
-    public async Task<Response<MarketplaceDTO?>> GetMarketplaceById(int userProfileId, int marketplaceId)
+    public async Task<Response<AllMarketplaceInfoDTO?>> GetMarketplaceById(int userProfileId, int marketplaceId)
     {
         var marketplace = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
             .SelectMany(s => s.Marketplaces)
         .FirstOrDefaultAsync(m => m.Id == marketplaceId);
 
-        if(marketplace is null){
-            return new Response<MarketplaceDTO?>(HttpStatusCode.BadRequest, "The current marketplace doesnt exist!!");
-        }
+        if(marketplace is null)
+            return new Response<AllMarketplaceInfoDTO?>
+                (HttpStatusCode.BadRequest, "The current marketplace doesnt exist!!");
 
-        return new Response<MarketplaceDTO?>(_mapper.Map<MarketplaceDTO>(marketplace));
+        return new Response<AllMarketplaceInfoDTO?> (_mapper.Map<AllMarketplaceInfoDTO>(marketplace));
     }
 
-    public async Task<Response<string>> UpdateMarketplace(int userProfileId, MarketplaceDTO marketplaceDTO)
+    public async Task<Response<string>> UpdateMarketplace(int userProfileId, CreateMarketplaceDTO marketplaceDTO)
     {
         var marketplace = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
             .SelectMany(s => s.Marketplaces)
         .FirstOrDefaultAsync(m => m.Id == marketplaceDTO.Id);
         
-        if(marketplace is null){
+        if(marketplace is null)
             return new Response<string>(HttpStatusCode.BadRequest, "The current marketplace doesnt exist!!");
-        }
 
-        marketplace.Name = marketplaceDTO.Name;
-        marketplace.Description = marketplaceDTO.Description;
-        marketplace.ImageURL = marketplaceDTO.ImageURL;
+        if(marketplaceDTO.Name != "" || marketplaceDTO.Name != null)
+            marketplace.Name = marketplaceDTO.Name;
+
+        if(marketplaceDTO.Description != "" || marketplaceDTO.Description != null)
+            marketplace.Description = marketplaceDTO.Description; 
+        
+        if(marketplaceDTO.IconURL != null){
+            var iconFilePath = await _fileService.SaveFileAsync(marketplaceDTO.IconURL);
+            marketplace.IconURL = iconFilePath;
+        }
+        if (marketplaceDTO.ImageURL != null) {
+            var imageFilePath = await _fileService.SaveFileAsync(marketplaceDTO.ImageURL);
+            marketplace.ImageURL = imageFilePath;
+        }
         
         await _dataContext.SaveChangesAsync();
 
-        return new Response<string>(HttpStatusCode.OK, $"The {marketplace.Name} marketplace was updated!");
+        return new Response<string>
+            (HttpStatusCode.OK, $"The {marketplace.Name} marketplace was updated!");
     }
 }

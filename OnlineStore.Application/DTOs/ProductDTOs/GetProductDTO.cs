@@ -1,6 +1,6 @@
 namespace OnlineStore.Application.DTOs;
 
-public class AllProductDTO
+public class GetProductDTO
 {
     public int Id { get; set; }
     public string Name { get; set; } = default!;
@@ -9,5 +9,5 @@ public class AllProductDTO
 
     public string MarketplaceName { get; set; } = default!;
 
-    public string ProductIcon { get; set; } = null!; 
+    public string ProductIconURL { get; set; } = null!; 
 }

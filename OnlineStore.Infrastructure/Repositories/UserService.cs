@@ -23,11 +23,11 @@ public class UserService(DataContext dataContext, IMapper mapper) : IUserService
 
         return new Response<AllProductInfoDTO?>(_mapper.Map<AllProductInfoDTO>(product));
     }
-    public async Task<Response<List<AllProductDTO?>>> GetAllProducts(){
+    public async Task<Response<List<GetProductDTO?>>> GetAllProducts(){
         var products = await _dataContext.Products.ToListAsync();
-        if(products is null) return new Response<List<AllProductDTO?>>(HttpStatusCode.BadRequest, "No products are available!");
+        if(products is null) return new Response<List<GetProductDTO?>>(HttpStatusCode.BadRequest, "No products are available!");
         
-        return new Response<List<AllProductDTO?>>(_mapper.Map<List<AllProductDTO?>>(products));
+        return new Response<List<GetProductDTO?>>(_mapper.Map<List<GetProductDTO?>>(products));
     }
 
     public async Task<Response<UserProfile?>> GetAccountInfo(int id)

@@ -14,5 +14,9 @@ public class UserProfile
     public User User { get; set; } = null!; 
     public Seller? Seller { get; set; } 
 
+    // some properties for confirmaing email
+    public string? ConfirmationCode { get; set; }
+    public DateTime? ConfirmationDate { get; set; }
+
     public ICollection<UserRole> UserRoles { get; set; } = null!;
 }

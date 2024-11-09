@@ -14,7 +14,7 @@ namespace OnlineStore.Api.Controllers;
 public class ProductServiceController(IProductService _productService) : ControllerBase
 {
     [HttpGet("get-product-by-id{marketplaceId}/{productId}")]
-        public async Task<ActionResult<ProductDTO?>> GetProductById(int marketplaceId, int productId)
+        public async Task<ActionResult<AllProductInfoDTO?>> GetProductById(int marketplaceId, int productId)
         {
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
@@ -28,7 +28,7 @@ public class ProductServiceController(IProductService _productService) : Control
         }
 
     [HttpGet("get-all-products{marketplaceId}")]
-        public async Task<ActionResult<List<ProductDTO?>>> GetAllProducts(int marketplaceId)
+        public async Task<ActionResult<List<GetProductDTO?>>> GetAllProducts(int marketplaceId)
         {
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             

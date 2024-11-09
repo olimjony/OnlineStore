@@ -12,7 +12,7 @@ public class AllProductInfoDTO
     public int MarketplaceId { get; set; }
     public int CategoryId { get; set; }
 
-    public string ProductIcon { get; set; } = null!; 
+    public string ProductIconURL { get; set; } = null!; 
     public List<ProductImageDTO?> ProductImages { get; set; } = new List<ProductImageDTO?>();    
     public List<ProductAttributeDTO> Attributes { get; set; } = new List<ProductAttributeDTO>();
 }

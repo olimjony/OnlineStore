@@ -14,7 +14,7 @@ namespace OnlineStore.Api.Controllers
     public class MarketplaceController(IMarketplaceService _marketplaceService) : ControllerBase
     {
         [HttpGet("get-marketplace-by-id{marketplaceId}")]
-        public async Task<ActionResult<MarketplaceDTO?>> GetMarketplaceById(int marketplaceId)
+        public async Task<ActionResult<AllMarketplaceInfoDTO?>> GetMarketplaceById(int marketplaceId)
         {
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
@@ -26,7 +26,7 @@ namespace OnlineStore.Api.Controllers
         }
 
         [HttpGet("get-all-marketplaces")]
-        public async Task<ActionResult<List<MarketplaceDTO?>>> GetAllMarketplaces()
+        public async Task<ActionResult<List<GetMarketplaceDTO?>>> GetAllMarketplaces()
         {
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
@@ -37,7 +37,7 @@ namespace OnlineStore.Api.Controllers
         }
 
         [HttpPost("create-marketplace")]
-        public async Task<ActionResult<string>> CreateMarketplace([FromBody] MarketplaceDTO marketplaceDTO)
+        public async Task<ActionResult<string>> CreateMarketplace([FromBody] CreateMarketplaceDTO marketplaceDTO)
         {
             var validator = new MarketplaceValidator();
             var validationResult = validator.Validate(marketplaceDTO);
@@ -45,7 +45,7 @@ namespace OnlineStore.Api.Controllers
 
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _marketplaceService.CreateMarketplace(marketplaceDTO, userProfileId);
+            var response = await _marketplaceService.CreateMarketplace(userProfileId, marketplaceDTO);
 
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
@@ -63,7 +63,7 @@ namespace OnlineStore.Api.Controllers
         }
 
         [HttpPut("update-marketplace{marketplaceId}")]
-        public async Task<ActionResult<string>> UpdateMarketplace([FromBody] MarketplaceDTO marketplaceDTO, int marketplaceId)
+        public async Task<ActionResult<string>> UpdateMarketplace([FromBody] CreateMarketplaceDTO marketplaceDTO, int marketplaceId)
         {
             var validator = new MarketplaceValidator();
             var validationResult = validator.Validate(marketplaceDTO);

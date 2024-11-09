@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OnlineStore.Application.DTOs;
+using OnlineStore.Application.DTOs.AuthenticationDTOs;
 using OnlineStore.Application.Interfaces;
 using OnlineStore.Application.Validators;
 using OnlineStore.Domain.Constants;
@@ -52,4 +53,43 @@ public class UserRegisterController(IUserAuthentication userAuthentication) : Co
         else
             return BadRequest(response.Errors);
     }
+
+    [HttpPut("confirm-email{email}")]
+    public async Task<ActionResult<string>> ConfirmEmail(string email){
+        //int Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        
+        var response = await userAuthentication.ConfirmEmail(email);
+        
+        if(response.StatusCode == 202)
+            return Ok(response.Errors);
+        else
+            return BadRequest(response.Errors);
+    }
+    [Authorize(Roles = Roles.User + "," + Roles.Seller)]
+    [HttpPut("verify-confirmation-code{confirmationCode}")]
+    public async Task<ActionResult<string>> VerifyConfirmationCode(string confirmationCode){
+        int Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        
+        var response = await userAuthentication.VerifyConfirmationCode(Id, confirmationCode);
+        
+        if(response.StatusCode == 200)
+            return Ok(response.Data);
+        else
+            return BadRequest(response.Errors);
+    }
+
+    [Authorize(Roles = Roles.User + "," + Roles.Seller)]
+    [HttpPut("change-password")]
+    public async Task<ActionResult<string>> ChangePassword([FromBody] ChangePasswordDTO changePasswordDTO){
+        int Id = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        
+        var response = await userAuthentication.ChangePassword(Id, changePasswordDTO);
+        
+        if(response.StatusCode == 200)
+            return Ok(response.Errors);
+        else
+            return BadRequest(response.Errors);
+    }
+
+    
 }

@@ -1,6 +1,6 @@
 using System.Net;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
+using Infrastructure.Services.FileService;
 using Microsoft.EntityFrameworkCore;
 using OnlineStore.Application.DTOs;
 using OnlineStore.Application.Interfaces;
@@ -10,7 +10,7 @@ using OnlineStore.Infrastructure.Persistence;
 
 namespace OnlineStore.Infrastructure.Repositories;
 
-public class ProductService(DataContext _dataContext, IMapper _mapper) : IProductService
+public class ProductService(DataContext _dataContext, IMapper _mapper, IFileService _fileService) : IProductService
 {
     public async Task<Response<string>> CreateProduct(int userProfileId, int marketplaceId, CreateProductDTO productDTO) {
         var seller = await _dataContext.Sellers
@@ -37,20 +37,23 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
             .ToList(),
         };
 
-        if (productDTO.ProductIcon != null) {
-            var iconFilePath = await SaveFileAsync(productDTO.ProductIcon);
+        if (productDTO.ProductIconURL is not null) {
+            var iconFilePath = await _fileService.SaveFileAsync(productDTO.ProductIconURL);
             product.ProductIcon = iconFilePath;
         }
 
-        foreach (var image in productDTO.ProductImages) {
-            var imagePath = await SaveFileAsync(image);
-            product.ProductImages.Add(new ProductImage { ImageUrl = imagePath });
+        if(productDTO.ProductImages is not null){
+            foreach (var image in productDTO.ProductImages) {
+                var imagePath = await _fileService.SaveFileAsync(image);
+                product.ProductImages.Add(new ProductImage { ImageUrl = imagePath });
+            }
         }
 
         _dataContext.Products.Add(product);
         await _dataContext.SaveChangesAsync();
 
-        return new Response<string>(HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");
+        return new Response<string>
+            (HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");
     }
 
     public async Task<Response<string>> DeleteProduct(int userProfileId, int marketplaceId, int productId) {
@@ -60,14 +63,16 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
                 .ThenInclude(m => m.Products)
         .FirstOrDefaultAsync();
 
-        if (seller is null) return new Response<string>(HttpStatusCode.BadRequest, "Seller not found for the given user profile.");
+        if (seller is null) return new Response<string>
+            (HttpStatusCode.BadRequest, "Seller not found for the given user profile.");
 
         var product = seller.Marketplaces
             .Where(m => m.Id == marketplaceId)
             .SelectMany(m => m.Products)
         .FirstOrDefault(p => p.Id == productId);
 
-        if (product is null) return new Response<string>(HttpStatusCode.BadRequest, "Product not found in seller's marketplaces.");
+        if (product is null) return new Response<string>
+            (HttpStatusCode.BadRequest, "Product not found in seller's marketplaces.");
 
         _dataContext.Remove(product);
         await _dataContext.SaveChangesAsync();
@@ -75,36 +80,38 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
         return new Response<string>(HttpStatusCode.OK, $"The {product.Name} product was deleted!");
     }
 
-    public async Task<Response<List<ProductDTO?>>> GetAllProducts(int userProfileId, int marketplaceId) {
+    public async Task<Response<List<GetProductDTO?>>> GetAllProducts(int userProfileId, int marketplaceId) {
         var products = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
-            .Include(s => s.Marketplaces)
-            .ThenInclude(m => m.Products)
-            .SelectMany(x => x.Marketplaces.SelectMany(x => x.Products))
+            .SelectMany(x => x.Marketplaces)
+            .SelectMany(x => x.Products)
         .ToListAsync();
 
-        if (products is null) return new Response<List<ProductDTO?>>(HttpStatusCode.BadRequest, "Products were not found in seller's marketplaces.");
+        if (products is null) return new Response<List<GetProductDTO?>>
+            (HttpStatusCode.BadRequest, "Products were not found in seller's marketplaces.");
 
-        return new Response<List<ProductDTO?>>(_mapper.Map<List<ProductDTO?>>(products));
+        return new Response<List<GetProductDTO?>>(_mapper.Map<List<GetProductDTO?>>(products));
     }
 
-    public async Task<Response<ProductDTO?>> GetProductById(int userProfileId, int marketplaceId, int productId) {
+    public async Task<Response<AllProductInfoDTO?>> GetProductById(int userProfileId, int marketplaceId, int productId) {
         var seller = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
             .Include(s => s.Marketplaces)
             .ThenInclude(m => m.Products)
         .FirstOrDefaultAsync();
 
-        if (seller is null) return new Response<ProductDTO?>(HttpStatusCode.BadRequest, "Seller not found for the given user profile.");
+        if (seller is null) return new Response<AllProductInfoDTO?>
+            (HttpStatusCode.BadRequest, "Seller not found for the given user profile.");
 
         var product = seller.Marketplaces
             .Where(x => x.Id == marketplaceId)
             .SelectMany(m => m.Products)
         .FirstOrDefault(p => p.Id == productId);
 
-        if (product is null) return new Response<ProductDTO?>(HttpStatusCode.BadRequest, "Product not found in seller's marketplaces.");
+        if (product is null) return new Response<AllProductInfoDTO?>
+            (HttpStatusCode.BadRequest, "Product not found in seller's marketplaces.");
 
-        return new Response<ProductDTO?>(_mapper.Map<ProductDTO>(product));
+        return new Response<AllProductInfoDTO?>(_mapper.Map<AllProductInfoDTO>(product));
     }
 
     public async Task<Response<string>> UpdateProduct(int userProfileId, int marketplaceId, int productId, CreateProductDTO productDTO)
@@ -115,44 +122,50 @@ public class ProductService(DataContext _dataContext, IMapper _mapper) : IProduc
             .ThenInclude(x => x.Products)
         .FirstOrDefaultAsync();
 
-        if (seller is null) return new Response<string>(HttpStatusCode.BadRequest, "the current Seller was not found!");
+        if (seller is null) return new Response<string>
+            (HttpStatusCode.BadRequest, "the current Seller was not found!");
 
         var marketplace = seller.Marketplaces.FirstOrDefault(x => x.Id == marketplaceId);
-        if(marketplace is null) return new Response<string>(HttpStatusCode.BadRequest, "The marketplace was not found!");
+        if(marketplace is null) return new Response<string>
+            (HttpStatusCode.BadRequest, "The marketplace was not found!");
 
         var product = marketplace.Products.FirstOrDefault(x => x.Id == productId);
-        if(product is null) return new Response<string>(HttpStatusCode.BadRequest, "product wasn't found!");
+        if(product is null) return new Response<string>
+            (HttpStatusCode.BadRequest, "product wasn't found!");
 
-        product.Name = productDTO.Name;
-        product.Description = productDTO.Description;
-        product.MarketplaceId = marketplaceId;
-        product.Price = productDTO.Price;
-        product.StockQuantity = productDTO.StockQuantity;
-        product.SKU = "a";
-        product.CategoryId = productDTO.CategoryId;
+        if(!string.IsNullOrEmpty(productDTO.Name))
+            product.Name = productDTO.Name;
+
+        if(!string.IsNullOrEmpty(productDTO.Description))
+            product.Description = productDTO.Description;
+
+        if(productDTO.Price != 0 && !(productDTO.Price < 0))
+            product.Price = productDTO.Price;
+
+        if(productDTO.StockQuantity != 0 && !(productDTO.StockQuantity < 0))
+            product.StockQuantity = productDTO.StockQuantity;
+
+        if(productDTO.MarketplaceId != 0 && !(productDTO.MarketplaceId < 0))
+            product.MarketplaceId = marketplaceId;
         
-        if (productDTO.ProductIcon != null) {
-            var iconFilePath = await SaveFileAsync(productDTO.ProductIcon);
+        if(productDTO.CategoryId != 0 && !(productDTO.CategoryId < 0))
+            product.CategoryId = productDTO.CategoryId;
+        
+        product.SKU = "a";
+        
+        if(productDTO.ProductIconURL != null) {
+            var iconFilePath = await _fileService.SaveFileAsync(productDTO.ProductIconURL);
             product.ProductIcon = iconFilePath;
         }
 
-        return new Response<string>(HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");    
+        if(productDTO.ProductImages != null){
+            foreach (var image in productDTO.ProductImages) {
+                var imagePath = await _fileService.SaveFileAsync(image);
+                product.ProductImages.Add(new ProductImage { ImageUrl = imagePath });
+            }
+        }
+
+        return new Response<string>
+            (HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");    
     }
-    
-    private async Task<string> SaveFileAsync(IFormFile file)
-{
-    var uploadsDirectory = Path.Combine("wwwroot", "uploads", "productsImages");
-    if (!Directory.Exists(uploadsDirectory))
-        Directory.CreateDirectory(uploadsDirectory);
-
-    var fileName = $"{Guid.NewGuid()}_{file.FileName}";
-    var filePath = Path.Combine(uploadsDirectory, fileName);
-
-    using (var fileStream = new FileStream(filePath, FileMode.Create))
-    {
-        await file.CopyToAsync(fileStream);
-    }
-
-    return $"/uploads/products/{fileName}";
-}
 }
