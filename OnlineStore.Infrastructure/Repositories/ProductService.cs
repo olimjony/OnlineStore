@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineStore.Application.DTOs;
 using OnlineStore.Application.Interfaces;
 using OnlineStore.Application.Responses;
+using OnlineStore.Domain.Constants;
 using OnlineStore.Domain.Entities;
 using OnlineStore.Infrastructure.Persistence;
 
@@ -38,13 +39,13 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         };
 
         if (productDTO.ProductIconURL is not null) {
-            var iconFilePath = await _fileService.SaveFileAsync(productDTO.ProductIconURL);
+            var iconFilePath = await _fileService.SaveFileAsync(Paths.productIconFolder, productDTO.ProductIconURL);
             product.ProductIcon = iconFilePath;
         }
 
         if(productDTO.ProductImages is not null){
             foreach (var image in productDTO.ProductImages) {
-                var imagePath = await _fileService.SaveFileAsync(image);
+                var imagePath = await _fileService.SaveFileAsync(Paths.ProductImageFolder, image);
                 product.ProductImages.Add(new ProductImage { ImageUrl = imagePath });
             }
         }
@@ -114,7 +115,7 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         return new Response<AllProductInfoDTO?>(_mapper.Map<AllProductInfoDTO>(product));
     }
 
-    public async Task<Response<string>> UpdateProduct(int userProfileId, int marketplaceId, int productId, CreateProductDTO productDTO)
+    public async Task<Response<string>> UpdateProduct(int userProfileId, UpdateProductDTO productDTO)
     {
         var seller = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
@@ -125,11 +126,11 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         if (seller is null) return new Response<string>
             (HttpStatusCode.BadRequest, "the current Seller was not found!");
 
-        var marketplace = seller.Marketplaces.FirstOrDefault(x => x.Id == marketplaceId);
+        var marketplace = seller.Marketplaces.FirstOrDefault(x => x.Id == productDTO.MarketplaceId);
         if(marketplace is null) return new Response<string>
             (HttpStatusCode.BadRequest, "The marketplace was not found!");
 
-        var product = marketplace.Products.FirstOrDefault(x => x.Id == productId);
+        var product = marketplace.Products.FirstOrDefault(x => x.Id == productDTO.Id);
         if(product is null) return new Response<string>
             (HttpStatusCode.BadRequest, "product wasn't found!");
 
@@ -146,7 +147,7 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
             product.StockQuantity = productDTO.StockQuantity;
 
         if(productDTO.MarketplaceId != 0 && !(productDTO.MarketplaceId < 0))
-            product.MarketplaceId = marketplaceId;
+            product.MarketplaceId = productDTO.MarketplaceId;
         
         if(productDTO.CategoryId != 0 && !(productDTO.CategoryId < 0))
             product.CategoryId = productDTO.CategoryId;
@@ -154,13 +155,13 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         product.SKU = "a";
         
         if(productDTO.ProductIconURL != null) {
-            var iconFilePath = await _fileService.SaveFileAsync(productDTO.ProductIconURL);
+            var iconFilePath = await _fileService.SaveFileAsync(Paths.productIconFolder, productDTO.ProductIconURL);
             product.ProductIcon = iconFilePath;
         }
 
         if(productDTO.ProductImages != null){
             foreach (var image in productDTO.ProductImages) {
-                var imagePath = await _fileService.SaveFileAsync(image);
+                var imagePath = await _fileService.SaveFileAsync(Paths.ProductImageFolder, image);
                 product.ProductImages.Add(new ProductImage { ImageUrl = imagePath });
             }
         }

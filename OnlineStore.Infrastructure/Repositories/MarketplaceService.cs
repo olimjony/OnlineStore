@@ -7,6 +7,7 @@ using OnlineStore.Infrastructure.Persistence;
 using OnlineStore.Domain.Entities;
 using AutoMapper;
 using Infrastructure.Services.FileService;
+using OnlineStore.Domain.Constants;
 
 namespace OnlineStore.Infrastructure.Repositories;
 
@@ -39,12 +40,12 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
             SellerId = seller.Id
         };
 
-        if(marketplace.IconURL != null){
-            var iconFilePath = await _fileService.SaveFileAsync(marketplaceDTO.IconURL);
+        if(marketplaceDTO.IconURL != null){
+            var iconFilePath = await _fileService.SaveFileAsync(Paths.marketplaceIconFolder, marketplaceDTO.IconURL);
             marketplace.IconURL = iconFilePath;
         }
-        if(marketplace.ImageURL != null){
-            var imageFilePath = await _fileService.SaveFileAsync(marketplaceDTO.ImageURL);
+        if(marketplaceDTO.ImageURL != null){
+            var imageFilePath = await _fileService.SaveFileAsync(Paths.marketplaceImageFolder, marketplaceDTO.ImageURL);
             marketplace.ImageURL = imageFilePath;
         }
         
@@ -86,7 +87,7 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
         return new Response<AllMarketplaceInfoDTO?> (_mapper.Map<AllMarketplaceInfoDTO>(marketplace));
     }
 
-    public async Task<Response<string>> UpdateMarketplace(int userProfileId, CreateMarketplaceDTO marketplaceDTO)
+    public async Task<Response<string>> UpdateMarketplace(int userProfileId, UpdateMarketplaceDTO marketplaceDTO)
     {
         var marketplace = await _dataContext.Sellers
             .Where(s => s.UserProfileId == userProfileId)
@@ -103,11 +104,11 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
             marketplace.Description = marketplaceDTO.Description; 
         
         if(marketplaceDTO.IconURL != null){
-            var iconFilePath = await _fileService.SaveFileAsync(marketplaceDTO.IconURL);
+            var iconFilePath = await _fileService.SaveFileAsync(Paths.marketplaceIconFolder, marketplaceDTO.IconURL);
             marketplace.IconURL = iconFilePath;
         }
         if (marketplaceDTO.ImageURL != null) {
-            var imageFilePath = await _fileService.SaveFileAsync(marketplaceDTO.ImageURL);
+            var imageFilePath = await _fileService.SaveFileAsync(Paths.marketplaceImageFolder, marketplaceDTO.ImageURL);
             marketplace.ImageURL = imageFilePath;
         }
         

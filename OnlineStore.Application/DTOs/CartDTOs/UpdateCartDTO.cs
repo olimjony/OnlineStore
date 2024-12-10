@@ -1,11 +1,11 @@
+using Microsoft.AspNetCore.Http;
+
 namespace OnlineStore.Application.DTOs;
 
-public class CartDTO
+public class UpdateCartDTO
 {
     public int Id { get; set; }
     public string Name { get; set; } = default!;
     public string Description { get; set; } = default!;
-    public string CartIconURL { get; set; } = default!;
-    
-    public int UserId { get; set; }
+    public IFormFile? CartIconURL { get; set; } = default!;
 }

@@ -2,8 +2,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace OnlineStore.Application.DTOs;
 
-public class CreateMarketplaceDTO
+public class UpdateMarketplaceDTO
 {
+    public int Id { get; set; }
     public string Name { get; set;} = default!;
     public string Description { get; set;} = default!;
     public bool? Approved { get; set;}

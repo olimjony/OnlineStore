@@ -57,7 +57,9 @@ namespace OnlineStore.Infrastructure.Migrations
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ProfileImageUrl = table.Column<string>(type: "text", nullable: true)
+                    ProfileImageURL = table.Column<string>(type: "text", nullable: true),
+                    ConfirmationCode = table.Column<string>(type: "text", nullable: true),
+                    ConfirmationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -158,7 +160,8 @@ namespace OnlineStore.Infrastructure.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     Approved = table.Column<bool>(type: "boolean", nullable: true),
-                    ImageURL = table.Column<string>(type: "text", nullable: false),
+                    IconURL = table.Column<string>(type: "text", nullable: true),
+                    ImageURL = table.Column<string>(type: "text", nullable: true),
                     SellerId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -180,7 +183,7 @@ namespace OnlineStore.Infrastructure.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    CartIconURL = table.Column<string>(type: "text", nullable: false),
+                    CartIconURL = table.Column<string>(type: "text", nullable: true),
                     UserId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -205,9 +208,11 @@ namespace OnlineStore.Infrastructure.Migrations
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     StockQuantity = table.Column<int>(type: "integer", nullable: false),
                     SKU = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     MarketplaceId = table.Column<int>(type: "integer", nullable: false),
                     CategoryId = table.Column<int>(type: "integer", nullable: false),
-                    ProductIcon = table.Column<string>(type: "text", nullable: false)
+                    ProductIcon = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -317,7 +322,6 @@ namespace OnlineStore.Infrastructure.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ImageUrl = table.Column<string>(type: "text", nullable: false),
-                    IsPrimary = table.Column<bool>(type: "boolean", nullable: false),
                     ProductId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>

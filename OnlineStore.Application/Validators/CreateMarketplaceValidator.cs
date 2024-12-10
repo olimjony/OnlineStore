@@ -2,9 +2,9 @@ using FluentValidation;
 using OnlineStore.Application.DTOs;
 namespace OnlineStore.Application.Validators;
 
-public class MarketplaceValidator : AbstractValidator<CreateMarketplaceDTO>
+public class CreateMarketplaceValidator : AbstractValidator<CreateMarketplaceDTO>
 {
-    public MarketplaceValidator()
+    public CreateMarketplaceValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name of your marketplace is required!");

@@ -27,9 +27,14 @@ public static class ServiceCollectionExtensions
         // validators
         services.AddScoped<IValidator<UserRegisterDTO>, UserRegisterValidator>();
         services.AddScoped<IValidator<UserLoginDTO>, UserLoginValidator>(); 
-        services.AddScoped<IValidator<CreateMarketplaceDTO>, MarketplaceValidator>();
-        services.AddScoped<IValidator<CreateProductDTO>, ProductValidator>();
-        services.AddScoped<IValidator<CartDTO>, CartValidator>();
+        // creating
+        services.AddScoped<IValidator<CreateMarketplaceDTO>, CreateMarketplaceValidator>();
+        services.AddScoped<IValidator<CreateProductDTO>, CreateProductValidator>();
+        services.AddScoped<IValidator<CreateCartDTO>, CreateCartValidator>();
+        //updateing
+        services.AddScoped<IValidator<UpdateMarketplaceDTO>, UpdateMarketplaceValidator>();
+        services.AddScoped<IValidator<UpdateProductDTO>, UpdateProductValidator>();
+        services.AddScoped<IValidator<UpdateCartDTO>, UpdateCartValidator>();
 
         //other libs
         services.AddAutoMapper(typeof(Automapper));

@@ -41,7 +41,4 @@ public class ProductsServiceController(IUserService _productsService) : Controll
             return Ok(response.Data);
         return BadRequest(response.Errors);
     }
-
-    
-    
 }

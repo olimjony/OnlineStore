@@ -5,7 +5,6 @@ using OnlineStore.Application.DTOs;
 using OnlineStore.Domain.Constants;
 using OnlineStore.Application.Validators;
 using OnlineStore.Application.Interfaces;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace OnlineStore.Api.Controllers;
 
@@ -15,7 +14,7 @@ namespace OnlineStore.Api.Controllers;
 public class CartServiceController(ICartService _cartService) : ControllerBase
 {
     [HttpGet("get-cart-by-id{cartId}")]
-        public async Task<ActionResult<CartDTO?>> GetCartById(int cartId)
+        public async Task<ActionResult<AllCartInfoDTO?>> GetCartById(int cartId)
         {
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
@@ -27,7 +26,7 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
         }
 
     [HttpGet("get-all-carts")]
-        public async Task<ActionResult<List<CartDTO?>>> GetAllCarts()
+        public async Task<ActionResult<List<GetCartDTO?>>> GetAllCarts()
         {
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
@@ -38,16 +37,16 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
         }
 
         [HttpPost("create-cart")]
-        public async Task<ActionResult<string>> CreateCart([FromBody] CartDTO cartDTO)
+        public async Task<ActionResult<string>> CreateCart([FromForm] CreateCartDTO cartDTO)
         {
-            var validator = new CartValidator();
+            var validator = new CreateCartValidator();
             var validationResult = validator.Validate(cartDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString()); 
 
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             Console.WriteLine(userProfileId);
 
-            var response = await _cartService.CreateCart(cartDTO, userProfileId);
+            var response = await _cartService.CreateCart(userProfileId, cartDTO);
 
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
@@ -65,15 +64,15 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
         }
 
     [HttpPut("update-cart{cartId}")]
-        public async Task<ActionResult<string>> Cart([FromBody] CartDTO cartDTO, int cartId)
+        public async Task<ActionResult<string>> Cart([FromBody] UpdateCartDTO cartDTO, int cartId)
         {
-            var validator = new CartValidator();
+            var validator = new UpdateCartValidator();
             var validationResult = validator.Validate(cartDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString());
 
             int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _cartService.UpdateCart(userProfileId, cartId, cartDTO);
+            var response = await _cartService.UpdateCart(userProfileId, cartDTO);
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
         }

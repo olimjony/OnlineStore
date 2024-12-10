@@ -13,6 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowSpecificOrigin", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173")  // React app URL
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.OperationFilter<FileUploadOperationFilter>();
@@ -91,6 +101,7 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseCors("AllowSpecificOrigin");
 
 app.UseRouting();
 app.UseAuthentication();

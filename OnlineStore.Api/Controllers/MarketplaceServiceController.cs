@@ -39,7 +39,7 @@ namespace OnlineStore.Api.Controllers
         [HttpPost("create-marketplace")]
         public async Task<ActionResult<string>> CreateMarketplace([FromBody] CreateMarketplaceDTO marketplaceDTO)
         {
-            var validator = new MarketplaceValidator();
+            var validator = new CreateMarketplaceValidator();
             var validationResult = validator.Validate(marketplaceDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString()); 
 
@@ -63,9 +63,9 @@ namespace OnlineStore.Api.Controllers
         }
 
         [HttpPut("update-marketplace{marketplaceId}")]
-        public async Task<ActionResult<string>> UpdateMarketplace([FromBody] CreateMarketplaceDTO marketplaceDTO, int marketplaceId)
+        public async Task<ActionResult<string>> UpdateMarketplace([FromBody] UpdateMarketplaceDTO marketplaceDTO, int marketplaceId)
         {
-            var validator = new MarketplaceValidator();
+            var validator = new UpdateMarketplaceValidator();
             var validationResult = validator.Validate(marketplaceDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString());
 

@@ -3,9 +3,9 @@ using OnlineStore.Application.DTOs;
 
 namespace OnlineStore.Application.Validators;
 
-public class ProductValidator : AbstractValidator<CreateProductDTO>
+public class CreateProductValidator : AbstractValidator<CreateProductDTO>
 {
-    public ProductValidator()
+    public CreateProductValidator()
     {
         RuleFor(x => x.Name)
             .MaximumLength(50).WithMessage("The length should be less than 50 symbols!")

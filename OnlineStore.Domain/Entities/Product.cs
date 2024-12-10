@@ -18,7 +18,7 @@ public class Product
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
 
-    public string ProductIcon { get; set; } = null!; 
+    public string? ProductIcon { get; set; } = null!; 
     public ICollection<ProductImage> ProductImages { get; set; } = null!;    
     public ICollection<ProductAttribute> Attributes { get; set; } = null!;
 

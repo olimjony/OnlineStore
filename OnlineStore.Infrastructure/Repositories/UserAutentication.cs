@@ -17,10 +17,11 @@ using OnlineStore.Application.DTOs.AuthenticationDTOs;
 using OnlineStore.Infrastructure.Services.EmailService;
 using Domain.DTOs.EmailDTOs;
 using MimeKit.Text;
+using Infrastructure.Services.FileService;
 
 namespace OnlineStore.Infrastructure.Repositories;
 
-public class UserAutentication(DataContext _dataContext, IConfiguration _configuration, IHashService _hashService, IEmailService _emailService) : IUserAuthentication
+public class UserAutentication(DataContext _dataContext, IConfiguration _configuration, IHashService _hashService, IEmailService _emailService, IFileService _fileService) : IUserAuthentication
 {
     public async Task<Response<string>> Register(UserRegisterDTO userRegisterDTO)
     {
@@ -125,6 +126,7 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
             expires: DateTime.UtcNow.AddDays(2),
             signingCredentials: credentials
         );
+        
 
         var securityTokenHandler = new JwtSecurityTokenHandler();
         var tokenString = securityTokenHandler.WriteToken(token);
@@ -190,5 +192,37 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
             return new Response<string>(HttpStatusCode.BadRequest, "Wrong confirmationCode! try later!");
 
         return new Response<string>(await GenerateJwtToken(userProfile));
+    }
+
+    public async Task<Response<string>> UpdateUser(int userProfileId, UserUpdateDTO userUpdateDTO)
+    {
+        var userProfile = await _dataContext.UserProfiles
+            .Where(x => x.Id == userProfileId)
+        .FirstOrDefaultAsync();
+
+        if(userProfile is null)
+            return new Response<string>(HttpStatusCode.BadRequest, "Unable to identify user!");
+
+        if(userUpdateDTO.DateOfBirth is not null)
+            userProfile.DateOfBirth = userUpdateDTO.DateOfBirth;
+        
+        if(userUpdateDTO.FirstName is not null)
+            userProfile.FirstName = userUpdateDTO.FirstName;
+        
+        if(userUpdateDTO.LastName is not null)
+            userProfile.FirstName = userUpdateDTO.LastName;
+
+        if(userUpdateDTO.PhoneNumber is not null)
+            userProfile.FirstName = userUpdateDTO.PhoneNumber;
+        
+        if(userUpdateDTO.FirstName is not null)
+            userProfile.FirstName = userUpdateDTO.FirstName;
+    
+        if(userUpdateDTO.ProfileImageURL != null) {
+            var iconFilePath = await _fileService.SaveFileAsync(Paths.userAvatarFolder, userUpdateDTO.ProfileImageURL);
+            userProfile.ProfileImageURL = iconFilePath;
+        }
+
+        return new Response<string>(HttpStatusCode.OK, "Profile was updated succesfully!");
     }
 }

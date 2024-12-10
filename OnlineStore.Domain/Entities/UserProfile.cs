@@ -9,7 +9,7 @@ public class UserProfile
     public string PasswordHash { get; set; } = default!;
     public string? PhoneNumber { get; set; } = default!;
     public DateTime? DateOfBirth { get; set; }
-    public string? ProfileImageUrl { get; set; } = null!;
+    public string? ProfileImageURL { get; set; } = null!;
 
     public User User { get; set; } = null!; 
     public Seller? Seller { get; set; } 

@@ -12,8 +12,8 @@ using OnlineStore.Infrastructure.Persistence;
 namespace OnlineStore.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241108070045_MigrationIO")]
-    partial class MigrationIO
+    [Migration("20241210072918_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,7 +34,6 @@ namespace OnlineStore.Infrastructure.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CartIconURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
@@ -146,11 +145,9 @@ namespace OnlineStore.Infrastructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("IconURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
@@ -228,7 +225,6 @@ namespace OnlineStore.Infrastructure.Migrations
                         .HasColumnType("numeric");
 
                     b.Property<string>("ProductIcon")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("SKU")
@@ -396,7 +392,7 @@ namespace OnlineStore.Infrastructure.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
-                    b.Property<string>("ProfileImageUrl")
+                    b.Property<string>("ProfileImageURL")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
