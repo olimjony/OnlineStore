@@ -29,16 +29,4 @@ public class UserService(DataContext dataContext, IMapper mapper) : IUserService
         
         return new Response<List<GetProductDTO?>>(_mapper.Map<List<GetProductDTO?>>(products));
     }
-
-    public async Task<Response<UserProfile?>> GetAccountInfo(int id)
-    {
-        var fullInfo = await _dataContext.UserProfiles
-            .Where(x => x.Id == id)
-            .Include(x => x.UserRoles)
-        .FirstOrDefaultAsync();
-        
-        if(fullInfo is null)
-            return new Response<UserProfile?>(HttpStatusCode.BadRequest, "Likely not authorized!");
-        return new Response<UserProfile?>(fullInfo);
-    }
 }

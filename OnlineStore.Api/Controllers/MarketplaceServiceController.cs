@@ -16,9 +16,9 @@ namespace OnlineStore.Api.Controllers
         [HttpGet("get-marketplace-by-id{marketplaceId}")]
         public async Task<ActionResult<AllMarketplaceInfoDTO?>> GetMarketplaceById(int marketplaceId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
-            var response = await _marketplaceService.GetMarketplaceById(userProfileId, marketplaceId);
+            var response = await _marketplaceService.GetMarketplaceById(userAccountId, marketplaceId);
 
             if(response.StatusCode == 200) return Ok(response.Data);
             else if(response.StatusCode == 400) return BadRequest(response.Errors);
@@ -28,9 +28,9 @@ namespace OnlineStore.Api.Controllers
         [HttpGet("get-all-marketplaces")]
         public async Task<ActionResult<List<GetMarketplaceDTO?>>> GetAllMarketplaces()
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
-            var response = await _marketplaceService.GetAllMarketplaces(userProfileId);
+            var response = await _marketplaceService.GetAllMarketplaces(userAccountId);
             
             if(response.StatusCode == 200) return Ok(response.Data);
             else return BadRequest(response.Errors);
@@ -43,9 +43,9 @@ namespace OnlineStore.Api.Controllers
             var validationResult = validator.Validate(marketplaceDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString()); 
 
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _marketplaceService.CreateMarketplace(userProfileId, marketplaceDTO);
+            var response = await _marketplaceService.CreateMarketplace(userAccountId, marketplaceDTO);
 
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
@@ -54,9 +54,9 @@ namespace OnlineStore.Api.Controllers
         [HttpDelete("delete-marketplace-by-id{marketplaceId}")]
         public async Task<ActionResult<string>> DeleteMarketplace(int marketplaceId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);   
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);   
 
-            var response = await _marketplaceService.DeleteMarketplace(userProfileId, marketplaceId);
+            var response = await _marketplaceService.DeleteMarketplace(userAccountId, marketplaceId);
             
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
@@ -69,9 +69,9 @@ namespace OnlineStore.Api.Controllers
             var validationResult = validator.Validate(marketplaceDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString());
 
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _marketplaceService.UpdateMarketplace(userProfileId, marketplaceDTO);
+            var response = await _marketplaceService.UpdateMarketplace(userAccountId, marketplaceDTO);
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
         }

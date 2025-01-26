@@ -13,10 +13,10 @@ namespace OnlineStore.Infrastructure.Repositories;
 
 public class CartService(DataContext _dataContext, IMapper _mapper, IFileService _fileService) : ICartService
 {
-    public async Task<Response<string>> CreateCart(int userProfileId, CreateCartDTO cartDTO)
+    public async Task<Response<string>> CreateCart(int userAccountId, CreateCartDTO cartDTO)
     {
         var user = await _dataContext.Users
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
         .FirstOrDefaultAsync();
 
         if(user is null) return new Response<string>(HttpStatusCode.BadRequest, "Unable to identify the user!");
@@ -24,7 +24,7 @@ public class CartService(DataContext _dataContext, IMapper _mapper, IFileService
         var cart = new Cart(){
             Name = cartDTO.Name,
             Description = cartDTO.Description,
-            UserId = userProfileId,
+            UserId = userAccountId,
         };
 
         if (cartDTO.CartIconURL is not null) {
@@ -38,10 +38,10 @@ public class CartService(DataContext _dataContext, IMapper _mapper, IFileService
         return new Response<string>(HttpStatusCode.OK, $"New cart: {cartDTO.Name} was added!");
     }
 
-    public async Task<Response<string>> DeleteCart(int userId, int cartId)
+    public async Task<Response<string>> DeleteCart(int userAccountId, int cartId)
     {
         var user = await _dataContext.Users
-            .Where(x => x.UserProfileId == userId)
+            .Where(x => x.UserAccountId == userAccountId)
             .Include(x => x.Carts)
         .FirstOrDefaultAsync();
         
@@ -57,10 +57,10 @@ public class CartService(DataContext _dataContext, IMapper _mapper, IFileService
         return new Response<string>(HttpStatusCode.OK, $"The cart {cart.Name} was deleted!");
     }
 
-    public async Task<Response<List<GetCartDTO?>>> GetAllCarts(int userProfileId)
+    public async Task<Response<List<GetCartDTO?>>> GetAllCarts(int userAccountId)
     {
         var user = await _dataContext.Users
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
             .Include(x => x.Carts)
         .FirstOrDefaultAsync();
         if(user is null)
@@ -70,10 +70,10 @@ public class CartService(DataContext _dataContext, IMapper _mapper, IFileService
         return new Response<List<GetCartDTO?>>(cartsResponse!);
     }
 
-    public async Task<Response<AllCartInfoDTO?>> GetCartById(int userProfileId, int cartId)
+    public async Task<Response<AllCartInfoDTO?>> GetCartById(int userAccountId, int cartId)
     {
         var user = await _dataContext.Users
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
             .Include(x => x.Carts)
         .FirstOrDefaultAsync();
 
@@ -87,10 +87,10 @@ public class CartService(DataContext _dataContext, IMapper _mapper, IFileService
         return new Response<AllCartInfoDTO?>(_mapper.Map<AllCartInfoDTO>(cart));
     }
 
-    public async Task<Response<string>> UpdateCart(int userProfileId, UpdateCartDTO cartDTO)
+    public async Task<Response<string>> UpdateCart(int userAccountId, UpdateCartDTO cartDTO)
     {
         var cart = await _dataContext.Users
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
             .Include(x => x.Carts)
             .Select(x => x.Carts.FirstOrDefault(x => x.Id == cartDTO.Id))
         .FirstOrDefaultAsync();
@@ -103,7 +103,7 @@ public class CartService(DataContext _dataContext, IMapper _mapper, IFileService
         if(!string.IsNullOrEmpty(cartDTO.Description))
             cart.Description = cartDTO.Description;
         
-        cart.UserId = userProfileId;
+        cart.UserId = userAccountId;
 
         if (cartDTO.CartIconURL is not null) {
             var iconFilePath = await _fileService.SaveFileAsync(Paths.cartIconFolder, cartDTO.CartIconURL);

@@ -13,9 +13,9 @@ namespace OnlineStore.Infrastructure.Repositories;
 
 public class ProductService(DataContext _dataContext, IMapper _mapper, IFileService _fileService) : IProductService
 {
-    public async Task<Response<string>> CreateProduct(int userProfileId, int marketplaceId, CreateProductDTO productDTO) {
+    public async Task<Response<string>> CreateProduct(int userAccountId, int marketplaceId, CreateProductDTO productDTO) {
         var seller = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .Include(s => s.Marketplaces)
         .FirstOrDefaultAsync();
 
@@ -57,9 +57,9 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
             (HttpStatusCode.OK, $"The product {productDTO.Name} was added to marketplace!");
     }
 
-    public async Task<Response<string>> DeleteProduct(int userProfileId, int marketplaceId, int productId) {
+    public async Task<Response<string>> DeleteProduct(int userAccountId, int marketplaceId, int productId) {
         var seller = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .Include(s => s.Marketplaces)
                 .ThenInclude(m => m.Products)
         .FirstOrDefaultAsync();
@@ -81,9 +81,9 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         return new Response<string>(HttpStatusCode.OK, $"The {product.Name} product was deleted!");
     }
 
-    public async Task<Response<List<GetProductDTO?>>> GetAllProducts(int userProfileId, int marketplaceId) {
+    public async Task<Response<List<GetProductDTO?>>> GetAllProducts(int userAccountId, int marketplaceId) {
         var products = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .SelectMany(x => x.Marketplaces)
             .SelectMany(x => x.Products)
         .ToListAsync();
@@ -94,9 +94,9 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         return new Response<List<GetProductDTO?>>(_mapper.Map<List<GetProductDTO?>>(products));
     }
 
-    public async Task<Response<AllProductInfoDTO?>> GetProductById(int userProfileId, int marketplaceId, int productId) {
+    public async Task<Response<AllProductInfoDTO?>> GetProductById(int userAccountId, int marketplaceId, int productId) {
         var seller = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .Include(s => s.Marketplaces)
             .ThenInclude(m => m.Products)
         .FirstOrDefaultAsync();
@@ -115,10 +115,10 @@ public class ProductService(DataContext _dataContext, IMapper _mapper, IFileServ
         return new Response<AllProductInfoDTO?>(_mapper.Map<AllProductInfoDTO>(product));
     }
 
-    public async Task<Response<string>> UpdateProduct(int userProfileId, UpdateProductDTO productDTO)
+    public async Task<Response<string>> UpdateProduct(int userAccountId, UpdateProductDTO productDTO)
     {
         var seller = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .Include(s => s.Marketplaces)
             .ThenInclude(x => x.Products)
         .FirstOrDefaultAsync();

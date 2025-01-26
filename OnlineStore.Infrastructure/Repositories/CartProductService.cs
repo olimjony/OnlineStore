@@ -10,10 +10,10 @@ namespace OnlineStore.Infrastructure.Repositories;
 
 public class CartProductService(DataContext _dataContext, IMapper _mapper) : ICartProductService
 {
-    public async Task<Response<string>> DeleteCartProduct(int userProfileId, int cartId, int cartProductId)
+    public async Task<Response<string>> DeleteCartProduct(int userAccountId, int cartId, int cartProductId)
     {
         var cartProduct = await _dataContext.Users
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
             .SelectMany(x => x.Carts)
             .SelectMany(c => c.CartProducts)
         .FirstOrDefaultAsync(cp => cp.Id == cartProductId);
@@ -27,10 +27,10 @@ public class CartProductService(DataContext _dataContext, IMapper _mapper) : ICa
         return new Response<string>(HttpStatusCode.OK, $"The Cart Product {cartProduct.Id} was deleted sucessfully!");
     }
 
-    public async Task<Response<List<CartProductDTO?>>> GetAllCartProducts(int userProfileId, int cartId)
+    public async Task<Response<List<CartProductDTO?>>> GetAllCartProducts(int userAccountId, int cartId)
     {
         var cartProducts = await _dataContext.Users
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
             .SelectMany(x => x.Carts.Where(x => x.Id == cartId))
             .SelectMany(x => x.CartProducts)
         .ToListAsync();
@@ -43,10 +43,10 @@ public class CartProductService(DataContext _dataContext, IMapper _mapper) : ICa
         return new Response<List<CartProductDTO?>>(cartProductResponse);
     }
 
-    public async Task<Response<string>> UpdateCartProduct(int userProfileId, int cartId, CartProductDTO cartProductDTO)
+    public async Task<Response<string>> UpdateCartProduct(int userAccountId, int cartId, CartProductDTO cartProductDTO)
     {
         var cartProduct = await _dataContext.Users
-            .Where(x => x.Id == userProfileId)
+            .Where(x => x.Id == userAccountId)
             .SelectMany(x => x.Carts.Where(x => x.Id == cartId))
             .SelectMany(x => x.CartProducts.Where(x => x.Id == cartProductDTO.Id))
         .FirstOrDefaultAsync();

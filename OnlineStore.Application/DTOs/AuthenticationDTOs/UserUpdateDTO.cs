@@ -8,5 +8,5 @@ public class UserUpdateDTO
     public string? LastName { get; set; } = default!;
     public string? PhoneNumber { get; set; } = default!;
     public DateTime? DateOfBirth { get; set; }
-    public IFormFile ProfileImageURL { get; set; } = null!;
+    public IFormFile AccountImageURL { get; set; } = null!;
 }

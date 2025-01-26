@@ -25,7 +25,7 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
 {
     public async Task<Response<string>> Register(UserRegisterDTO userRegisterDTO)
     {
-        var user = await _dataContext.UserProfiles
+        var user = await _dataContext.UserAccounts
             .Where(x => x.Email == userRegisterDTO.Email)
         .FirstOrDefaultAsync();
 
@@ -36,7 +36,7 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
             .Where(x => x.Name == Roles.User)
         .First().Id;
 
-        var profile = new UserProfile()
+        var profile = new UserAccount()
         {
             FirstName = userRegisterDTO.FirstName,
             LastName = userRegisterDTO.LastName,
@@ -46,7 +46,7 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
             UserRoles = new List<UserRole> { new UserRole() { RoleId = userRoleId } }
         };
 
-        await _dataContext.UserProfiles.AddAsync(profile);
+        await _dataContext.UserAccounts.AddAsync(profile);
         await _dataContext.SaveChangesAsync();
 
         return new Response<string>(HttpStatusCode.OK, "You were registered successfully");
@@ -54,7 +54,7 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
 
     public async Task<Response<string>> Login(UserLoginDTO userLoginDTO)
     {
-        var user = await _dataContext.UserProfiles.Where(x => x.Email == userLoginDTO.Email).FirstOrDefaultAsync();
+        var user = await _dataContext.UserAccounts.Where(x => x.Email == userLoginDTO.Email).FirstOrDefaultAsync();
 
         if (user is null)
             return new Response<string>(HttpStatusCode.BadRequest, "Email or Password is Wrong!");
@@ -65,54 +65,54 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
         return new Response<string>(await GenerateJwtToken(user));
     }
 
-    public async Task<Response<string>> EnableSeller(int userProfileId)
+    public async Task<Response<string>> EnableSeller(int userAccountId)
     {
-        var userProfile = await _dataContext.UserProfiles
-            .Where(x => x.Id == userProfileId)
+        var userAccount = await _dataContext.UserAccounts
+            .Where(x => x.Id == userAccountId)
             .Include(x => x.UserRoles)
         .FirstOrDefaultAsync();
 
-        if (userProfile is null)
+        if (userAccount is null)
             return new Response<string>(HttpStatusCode.BadRequest, "Unknown Error! Likely idunno what!");
 
         var sellerRole = await _dataContext.Roles.Where(x => x.Name == Roles.Seller).FirstOrDefaultAsync();
 
-        foreach (var i in userProfile.UserRoles)
+        foreach (var i in userAccount.UserRoles)
             if (i.RoleId == sellerRole?.Id)
                 return new Response<string>(HttpStatusCode.BadRequest, "You are already a seller!");
 
-        userProfile.Seller = new Seller()
+        userAccount.Seller = new Seller()
         {
             MaxMarketplaces = 3,
-            UserProfileId = userProfileId
+            UserAccountId = userAccountId
         };
 
-        userProfile.UserRoles.Add(
+        userAccount.UserRoles.Add(
             new UserRole
             {
                 RoleId = sellerRole!.Id,
-                UserProfileId = userProfileId
+                UserAccountId = userAccountId
             });
 
         await _dataContext.SaveChangesAsync();
 
-        return new Response<string>(await GenerateJwtToken(userProfile));
+        return new Response<string>(await GenerateJwtToken(userAccount));
     }
 
-    private async Task<string> GenerateJwtToken(UserProfile userProfile)
+    private async Task<string> GenerateJwtToken(UserAccount userAccount)
     {
         var key = Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!);
         var securityKey = new SymmetricSecurityKey(key);
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var claims = new List<Claim>()
         {
-            new(ClaimTypes.NameIdentifier, userProfile.Id.ToString()),
-            new(ClaimTypes.Email, userProfile.Email),
+            new(ClaimTypes.NameIdentifier, userAccount.Id.ToString()),
+            new(ClaimTypes.Email, userAccount.Email),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
         var roles = await _dataContext.UserRoles
-            .Where(x => x.UserProfileId == userProfile.Id)
+            .Where(x => x.UserAccountId == userAccount.Id)
             .Include(x => x.Role)
         .ToListAsync();
 
@@ -135,92 +135,92 @@ public class UserAutentication(DataContext _dataContext, IConfiguration _configu
 
     public async Task<Response<string>> ConfirmEmail(string emailAddress)
     {
-        var userProfile = await _dataContext.UserProfiles
+        var userAccount = await _dataContext.UserAccounts
             .Where(x => x.Email == emailAddress)
         .FirstOrDefaultAsync();
 
-        if (userProfile is null)
+        if (userAccount is null)
             return new Response<string>(HttpStatusCode.BadRequest, "Current email doesnt exist!");
 
         var random = new Random();
-        userProfile.ConfirmationCode = random.Next(100000, 999999).ToString();
-        userProfile.ConfirmationDate = DateTime.UtcNow;
+        userAccount.ConfirmationCode = random.Next(100000, 999999).ToString();
+        userAccount.ConfirmationDate = DateTime.UtcNow;
 
         await _dataContext.SaveChangesAsync();
 
         await _emailService.SendEmail(new EmailMessageDto([emailAddress], "reset password",
-            $"<h1>{userProfile.ConfirmationCode}</h1> it expires at{userProfile.ConfirmationDate.Value.AddMinutes(3)}"), TextFormat.Html);
+            $"<h1>{userAccount.ConfirmationCode}</h1> it expires at{userAccount.ConfirmationDate.Value.AddMinutes(3)}"), TextFormat.Html);
 
         return new Response<string>(HttpStatusCode.Accepted, "The confirmation code was sent!");
     }
 
-    public async Task<Response<string>> ChangePassword (int userProfileId, ChangePasswordDTO passwordDTO)
+    public async Task<Response<string>> ChangePassword (int userAccountId, ChangePasswordDTO passwordDTO)
     {
-        var userProfile = await _dataContext.UserProfiles
-            .Where(x => x.Id == userProfileId)
+        var userAccount = await _dataContext.UserAccounts
+            .Where(x => x.Id == userAccountId)
         .FirstOrDefaultAsync();
 
-        if (userProfile is null)
+        if (userAccount is null)
             return new Response<string>(HttpStatusCode.BadRequest, "Unable to identify the user!");
 
-        if (!_hashService.VerifyHash(passwordDTO.OldPassword, userProfile.PasswordHash))
+        if (!_hashService.VerifyHash(passwordDTO.OldPassword, userAccount.PasswordHash))
             return new Response<string>(HttpStatusCode.BadRequest, "Wrong password bro!");
 
         if (passwordDTO.NewPassword != passwordDTO.NewPasswordRepet)
             return new Response<string>(HttpStatusCode.BadRequest, "New password and its repetead doesnt match!");
 
-        userProfile.PasswordHash = _hashService.ConvertToHash(passwordDTO.NewPassword);
+        userAccount.PasswordHash = _hashService.ConvertToHash(passwordDTO.NewPassword);
 
         await _dataContext.SaveChangesAsync();
 
         return new Response<string>(HttpStatusCode.OK, "Your Password was sucessfully updated!");
     }
 
-    public async Task<Response<string>> VerifyConfirmationCode(int userProfileId, string confirmationCode)
+    public async Task<Response<string>> VerifyConfirmationCode(int userAccountId, string confirmationCode)
     {
-        var userProfile = await _dataContext.UserProfiles
-            .Where(x => x.Id == userProfileId)
+        var userAccount = await _dataContext.UserAccounts
+            .Where(x => x.Id == userAccountId)
         .FirstOrDefaultAsync();
 
-        if(userProfile is null)
+        if(userAccount is null)
             return new Response<string>(HttpStatusCode.BadRequest, "Unable to identify the user!");
         
-        if(DateTime.UtcNow > userProfile.ConfirmationDate.GetValueOrDefault().AddMinutes(3))
+        if(DateTime.UtcNow > userAccount.ConfirmationDate.GetValueOrDefault().AddMinutes(3))
             return new Response<string>(HttpStatusCode.BadRequest, "Confirmation time is expired try again!");
         
-        if(userProfile.ConfirmationCode != confirmationCode)
+        if(userAccount.ConfirmationCode != confirmationCode)
             return new Response<string>(HttpStatusCode.BadRequest, "Wrong confirmationCode! try later!");
 
-        return new Response<string>(await GenerateJwtToken(userProfile));
+        return new Response<string>(await GenerateJwtToken(userAccount));
     }
 
-    public async Task<Response<string>> UpdateUser(int userProfileId, UserUpdateDTO userUpdateDTO)
+    public async Task<Response<string>> UpdateUser(int userAccountId, UserUpdateDTO userUpdateDTO)
     {
-        var userProfile = await _dataContext.UserProfiles
-            .Where(x => x.Id == userProfileId)
+        var userAccount = await _dataContext.UserAccounts
+            .Where(x => x.Id == userAccountId)
         .FirstOrDefaultAsync();
 
-        if(userProfile is null)
+        if(userAccount is null)
             return new Response<string>(HttpStatusCode.BadRequest, "Unable to identify user!");
 
         if(userUpdateDTO.DateOfBirth is not null)
-            userProfile.DateOfBirth = userUpdateDTO.DateOfBirth;
+            userAccount.DateOfBirth = userUpdateDTO.DateOfBirth;
         
         if(userUpdateDTO.FirstName is not null)
-            userProfile.FirstName = userUpdateDTO.FirstName;
+            userAccount.FirstName = userUpdateDTO.FirstName;
         
         if(userUpdateDTO.LastName is not null)
-            userProfile.FirstName = userUpdateDTO.LastName;
+            userAccount.FirstName = userUpdateDTO.LastName;
 
         if(userUpdateDTO.PhoneNumber is not null)
-            userProfile.FirstName = userUpdateDTO.PhoneNumber;
+            userAccount.FirstName = userUpdateDTO.PhoneNumber;
         
         if(userUpdateDTO.FirstName is not null)
-            userProfile.FirstName = userUpdateDTO.FirstName;
+            userAccount.FirstName = userUpdateDTO.FirstName;
     
-        if(userUpdateDTO.ProfileImageURL != null) {
-            var iconFilePath = await _fileService.SaveFileAsync(Paths.userAvatarFolder, userUpdateDTO.ProfileImageURL);
-            userProfile.ProfileImageURL = iconFilePath;
+        if(userUpdateDTO.AccountImageURL != null) {
+            var iconFilePath = await _fileService.SaveFileAsync(Paths.userAvatarFolder, userUpdateDTO.AccountImageURL);
+            userAccount.AccountImageURL = iconFilePath;
         }
 
         return new Response<string>(HttpStatusCode.OK, "Profile was updated succesfully!");

@@ -30,15 +30,4 @@ public class ProductsServiceController(IUserService _productsService) : Controll
             return Ok(response.Data);
         return BadRequest(response.Errors);
     }
-
-    [Authorize(Roles = Roles.User + "," + Roles.Seller)]
-    [HttpPost("all-my-info")]
-    public async Task<ActionResult<UserProfile?>> GetAllInfos(){
-        int userProfileId = Convert.ToInt32(User.FindFirst(JwtRegisteredClaimNames.Sub));
-        var response = await _productsService.GetAccountInfo(userProfileId);
-        
-        if(response.StatusCode == 200)
-            return Ok(response.Data);
-        return BadRequest(response.Errors);
-    }
 }

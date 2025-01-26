@@ -1,6 +1,7 @@
 using AutoMapper;
 using OnlineStore.Domain.Entities;
 using OnlineStore.Application.DTOs;
+using OnlineStore.Application.DTOs.AccountDTOs;
 
 namespace OnlineStore.Application.Mapping
 {
@@ -8,6 +9,9 @@ namespace OnlineStore.Application.Mapping
     {
         public Automapper()
         {
+            //account
+            CreateMap<UserAccount, AllAccountInfoDTO>().ReverseMap();
+
             //mapping for products
             CreateMap<Product, AllProductInfoDTO>().ReverseMap();
             CreateMap<Product, CreateProductDTO>().ReverseMap();

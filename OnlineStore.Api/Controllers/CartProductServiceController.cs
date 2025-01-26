@@ -14,9 +14,9 @@ public class CartProductServiceController(ICartProductService _cartProductServic
 {
     [HttpGet("get-all-cart-products{cartId}")]
     public async Task<ActionResult<List<CartProductDTO?>>> GetAllCartProducts(int cartId){
-        int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
+        int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
             
-        var response = await _cartProductService.GetAllCartProducts(userProfileId, cartId);
+        var response = await _cartProductService.GetAllCartProducts(userAccountId, cartId);
 
         if(response.StatusCode == 200) return Ok(response.Data);
         else if(response.StatusCode == 400) return BadRequest(response.Errors);
@@ -25,9 +25,9 @@ public class CartProductServiceController(ICartProductService _cartProductServic
 
     [HttpDelete("delete-cart-product{cartId},{cartProductId}")]
     public async Task<ActionResult<string>> DeleteCartProduct(int cartId, int cartProductId){
-        int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
+        int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
             
-        var response = await _cartProductService.DeleteCartProduct(userProfileId, cartId, cartProductId);
+        var response = await _cartProductService.DeleteCartProduct(userAccountId, cartId, cartProductId);
 
         if(response.StatusCode == 200)
             return Ok(response.Data);
@@ -39,9 +39,9 @@ public class CartProductServiceController(ICartProductService _cartProductServic
 
     [HttpPut("update-cart-product{cartId}")]
     public async Task<ActionResult<string>> UpdateCartProduct(int cartId,[FromBody] CartProductDTO cartProductDTO){
-        int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
+        int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier));
             
-        var response = await _cartProductService.UpdateCartProduct(userProfileId, cartId, cartProductDTO);
+        var response = await _cartProductService.UpdateCartProduct(userAccountId, cartId, cartProductDTO);
 
         if(response.StatusCode == 200)
             return Ok(response.Data);

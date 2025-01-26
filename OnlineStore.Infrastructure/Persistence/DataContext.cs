@@ -5,7 +5,7 @@ namespace OnlineStore.Infrastructure.Persistence;
 
 public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
 {
-    internal DbSet<UserProfile> UserProfiles { get; set; }
+    internal DbSet<UserAccount> UserAccounts { get; set; }
     internal DbSet<User> Users { get; set; }
     internal DbSet<Seller> Sellers { get; set; }
     internal DbSet<Role> Roles { get; set; }
@@ -20,16 +20,16 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
     protected override void OnModelCreating(ModelBuilder modelBuilder){
 
-        //UserProfile Relationships
-        modelBuilder.Entity<UserProfile>()
+        //UserAccount Relationships
+        modelBuilder.Entity<UserAccount>()
             .HasOne(up => up.User)
-            .WithOne(u => u.UserProfile)
-            .HasForeignKey<User>(u => u.UserProfileId);
+            .WithOne(u => u.UserAccount)
+            .HasForeignKey<User>(u => u.UserAccountId);
 
-        modelBuilder.Entity<UserProfile>()
+        modelBuilder.Entity<UserAccount>()
             .HasOne(up =>up.Seller)
-            .WithOne(s => s.UserProfile)
-            .HasForeignKey<Seller>(u => u.UserProfileId);
+            .WithOne(s => s.UserAccount)
+            .HasForeignKey<Seller>(u => u.UserAccountId);
 
         // User Relationships
         modelBuilder.Entity<User>()
@@ -43,11 +43,11 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
         // User and Seller Roles
         modelBuilder.Entity<UserRole>()
-            .HasKey(ur => new {ur.UserProfileId, ur.RoleId });
+            .HasKey(ur => new {ur.UserAccountId, ur.RoleId });
         modelBuilder.Entity<UserRole>()
-            .HasOne(ur => ur.UserProfile) 
+            .HasOne(ur => ur.UserAccount) 
             .WithMany(up => up.UserRoles) 
-            .HasForeignKey(ur => ur.UserProfileId) 
+            .HasForeignKey(ur => ur.UserAccountId) 
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<UserRole>()
             .HasOne(ur => ur.Role) 

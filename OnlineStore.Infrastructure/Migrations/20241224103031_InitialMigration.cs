@@ -46,7 +46,7 @@ namespace OnlineStore.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserProfiles",
+                name: "UserAccounts",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -57,13 +57,13 @@ namespace OnlineStore.Infrastructure.Migrations
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
                     PhoneNumber = table.Column<string>(type: "text", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ProfileImageURL = table.Column<string>(type: "text", nullable: true),
+                    AccountImageURL = table.Column<string>(type: "text", nullable: true),
                     ConfirmationCode = table.Column<string>(type: "text", nullable: true),
                     ConfirmationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserProfiles", x => x.Id);
+                    table.PrimaryKey("PK_UserAccounts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,15 +94,15 @@ namespace OnlineStore.Infrastructure.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MaxMarketplaces = table.Column<int>(type: "integer", nullable: false),
-                    UserProfileId = table.Column<int>(type: "integer", nullable: false)
+                    UserAccountId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Sellers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Sellers_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
+                        name: "FK_Sellers_UserAccounts_UserAccountId",
+                        column: x => x.UserAccountId,
+                        principalTable: "UserAccounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -111,12 +111,12 @@ namespace OnlineStore.Infrastructure.Migrations
                 name: "UserRoles",
                 columns: table => new
                 {
-                    UserProfileId = table.Column<int>(type: "integer", nullable: false),
+                    UserAccountId = table.Column<int>(type: "integer", nullable: false),
                     RoleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRoles", x => new { x.UserProfileId, x.RoleId });
+                    table.PrimaryKey("PK_UserRoles", x => new { x.UserAccountId, x.RoleId });
                     table.ForeignKey(
                         name: "FK_UserRoles_Roles_RoleId",
                         column: x => x.RoleId,
@@ -124,9 +124,9 @@ namespace OnlineStore.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRoles_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
+                        name: "FK_UserRoles_UserAccounts_UserAccountId",
+                        column: x => x.UserAccountId,
+                        principalTable: "UserAccounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -138,15 +138,15 @@ namespace OnlineStore.Infrastructure.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MaxCarts = table.Column<int>(type: "integer", nullable: false),
-                    UserProfileId = table.Column<int>(type: "integer", nullable: false)
+                    UserAccountId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
+                        name: "FK_Users_UserAccounts_UserAccountId",
+                        column: x => x.UserAccountId,
+                        principalTable: "UserAccounts",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -396,9 +396,9 @@ namespace OnlineStore.Infrastructure.Migrations
                 column: "MarketplaceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Sellers_UserProfileId",
+                name: "IX_Sellers_UserAccountId",
                 table: "Sellers",
-                column: "UserProfileId",
+                column: "UserAccountId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -407,9 +407,9 @@ namespace OnlineStore.Infrastructure.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_UserProfileId",
+                name: "IX_Users_UserAccountId",
                 table: "Users",
-                column: "UserProfileId",
+                column: "UserAccountId",
                 unique: true);
         }
 
@@ -456,7 +456,7 @@ namespace OnlineStore.Infrastructure.Migrations
                 name: "Sellers");
 
             migrationBuilder.DropTable(
-                name: "UserProfiles");
+                name: "UserAccounts");
         }
     }
 }

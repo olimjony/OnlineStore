@@ -13,8 +13,8 @@ namespace OnlineStore.Infrastructure.Repositories;
 
 public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFileService _fileService) : IMarketplaceService
 {
-    public async Task<Response<List<GetMarketplaceDTO?>>> GetAllMarketplaces(int userProfileId){
-        var marketplaces = await _dataContext.Sellers.Where(x => x.UserProfileId == userProfileId)
+    public async Task<Response<List<GetMarketplaceDTO?>>> GetAllMarketplaces(int userAccountId){
+        var marketplaces = await _dataContext.Sellers.Where(x => x.UserAccountId == userAccountId)
             .Include(x => x.Marketplaces)
             .SelectMany(x => x.Marketplaces)
         .ToListAsync();
@@ -26,9 +26,9 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
         return new Response<List<GetMarketplaceDTO?>>(marketplacesResponse);      
     }
 
-    public async Task<Response<string>> CreateMarketplace(int userProfileId, CreateMarketplaceDTO marketplaceDTO){
+    public async Task<Response<string>> CreateMarketplace(int userAccountId, CreateMarketplaceDTO marketplaceDTO){
         var seller = await _dataContext.Sellers
-            .Where(x => x.UserProfileId == userProfileId)
+            .Where(x => x.UserAccountId == userAccountId)
         .FirstOrDefaultAsync();
 
         if(seller is null)
@@ -57,9 +57,9 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
             (HttpStatusCode.OK, $"You have successfully created a marketplace named {marketplace.Name}");
 
     }
-    public async Task<Response<string>> DeleteMarketplace(int userProfileId, int marketplaceId){
+    public async Task<Response<string>> DeleteMarketplace(int userAccountId, int marketplaceId){
         var marketplace = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .SelectMany(s => s.Marketplaces)
         .FirstOrDefaultAsync(m => m.Id == marketplaceId);
 
@@ -73,10 +73,10 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
             (HttpStatusCode.OK, $"The {marketplace.Name} was deleted successfully!");
     }
 
-    public async Task<Response<AllMarketplaceInfoDTO?>> GetMarketplaceById(int userProfileId, int marketplaceId)
+    public async Task<Response<AllMarketplaceInfoDTO?>> GetMarketplaceById(int userAccountId, int marketplaceId)
     {
         var marketplace = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .SelectMany(s => s.Marketplaces)
         .FirstOrDefaultAsync(m => m.Id == marketplaceId);
 
@@ -87,10 +87,10 @@ public class MarketplaceService(DataContext _dataContext, IMapper _mapper, IFile
         return new Response<AllMarketplaceInfoDTO?> (_mapper.Map<AllMarketplaceInfoDTO>(marketplace));
     }
 
-    public async Task<Response<string>> UpdateMarketplace(int userProfileId, UpdateMarketplaceDTO marketplaceDTO)
+    public async Task<Response<string>> UpdateMarketplace(int userAccountId, UpdateMarketplaceDTO marketplaceDTO)
     {
         var marketplace = await _dataContext.Sellers
-            .Where(s => s.UserProfileId == userProfileId)
+            .Where(s => s.UserAccountId == userAccountId)
             .SelectMany(s => s.Marketplaces)
         .FirstOrDefaultAsync(m => m.Id == marketplaceDTO.Id);
         

@@ -12,7 +12,7 @@ using OnlineStore.Infrastructure.Persistence;
 namespace OnlineStore.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241210072918_InitialMigration")]
+    [Migration("20241224103031_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -323,12 +323,12 @@ namespace OnlineStore.Infrastructure.Migrations
                     b.Property<int>("MaxMarketplaces")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserProfileId")
+                    b.Property<int>("UserAccountId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserProfileId")
+                    b.HasIndex("UserAccountId")
                         .IsUnique();
 
                     b.ToTable("Sellers");
@@ -345,24 +345,27 @@ namespace OnlineStore.Infrastructure.Migrations
                     b.Property<int>("MaxCarts")
                         .HasColumnType("integer");
 
-                    b.Property<int>("UserProfileId")
+                    b.Property<int>("UserAccountId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserProfileId")
+                    b.HasIndex("UserAccountId")
                         .IsUnique();
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("OnlineStore.Domain.Entities.UserProfile", b =>
+            modelBuilder.Entity("OnlineStore.Domain.Entities.UserAccount", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountImageURL")
+                        .HasColumnType("text");
 
                     b.Property<string>("ConfirmationCode")
                         .HasColumnType("text");
@@ -392,23 +395,20 @@ namespace OnlineStore.Infrastructure.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
-                    b.Property<string>("ProfileImageURL")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.ToTable("UserProfiles");
+                    b.ToTable("UserAccounts");
                 });
 
             modelBuilder.Entity("OnlineStore.Domain.Entities.UserRole", b =>
                 {
-                    b.Property<int>("UserProfileId")
+                    b.Property<int>("UserAccountId")
                         .HasColumnType("integer");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
 
-                    b.HasKey("UserProfileId", "RoleId");
+                    b.HasKey("UserAccountId", "RoleId");
 
                     b.HasIndex("RoleId");
 
@@ -547,24 +547,24 @@ namespace OnlineStore.Infrastructure.Migrations
 
             modelBuilder.Entity("OnlineStore.Domain.Entities.Seller", b =>
                 {
-                    b.HasOne("OnlineStore.Domain.Entities.UserProfile", "UserProfile")
+                    b.HasOne("OnlineStore.Domain.Entities.UserAccount", "UserAccount")
                         .WithOne("Seller")
-                        .HasForeignKey("OnlineStore.Domain.Entities.Seller", "UserProfileId")
+                        .HasForeignKey("OnlineStore.Domain.Entities.Seller", "UserAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserProfile");
+                    b.Navigation("UserAccount");
                 });
 
             modelBuilder.Entity("OnlineStore.Domain.Entities.User", b =>
                 {
-                    b.HasOne("OnlineStore.Domain.Entities.UserProfile", "UserProfile")
+                    b.HasOne("OnlineStore.Domain.Entities.UserAccount", "UserAccount")
                         .WithOne("User")
-                        .HasForeignKey("OnlineStore.Domain.Entities.User", "UserProfileId")
+                        .HasForeignKey("OnlineStore.Domain.Entities.User", "UserAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("UserProfile");
+                    b.Navigation("UserAccount");
                 });
 
             modelBuilder.Entity("OnlineStore.Domain.Entities.UserRole", b =>
@@ -575,15 +575,15 @@ namespace OnlineStore.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OnlineStore.Domain.Entities.UserProfile", "UserProfile")
+                    b.HasOne("OnlineStore.Domain.Entities.UserAccount", "UserAccount")
                         .WithMany("UserRoles")
-                        .HasForeignKey("UserProfileId")
+                        .HasForeignKey("UserAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
 
-                    b.Navigation("UserProfile");
+                    b.Navigation("UserAccount");
                 });
 
             modelBuilder.Entity("OnlineStore.Domain.Entities.Cart", b =>
@@ -633,7 +633,7 @@ namespace OnlineStore.Infrastructure.Migrations
                     b.Navigation("Orders");
                 });
 
-            modelBuilder.Entity("OnlineStore.Domain.Entities.UserProfile", b =>
+            modelBuilder.Entity("OnlineStore.Domain.Entities.UserAccount", b =>
                 {
                     b.Navigation("Seller");
 

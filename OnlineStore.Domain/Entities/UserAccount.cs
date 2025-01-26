@@ -1,6 +1,6 @@
 namespace OnlineStore.Domain.Entities;
 
-public class UserProfile
+public class UserAccount
 {
     public int Id { get; set; }
     public string FirstName { get; set; } = default!;
@@ -9,7 +9,7 @@ public class UserProfile
     public string PasswordHash { get; set; } = default!;
     public string? PhoneNumber { get; set; } = default!;
     public DateTime? DateOfBirth { get; set; }
-    public string? ProfileImageURL { get; set; } = null!;
+    public string? AccountImageURL { get; set; } = null!;
 
     public User User { get; set; } = null!; 
     public Seller? Seller { get; set; } 

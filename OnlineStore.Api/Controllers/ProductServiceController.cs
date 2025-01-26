@@ -16,9 +16,9 @@ public class ProductServiceController(IProductService _productService) : Control
     [HttpGet("get-product-by-id{marketplaceId}/{productId}")]
         public async Task<ActionResult<AllProductInfoDTO?>> GetProductById(int marketplaceId, int productId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccount = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
-            var response = await _productService.GetProductById(userProfileId, marketplaceId, productId);
+            var response = await _productService.GetProductById(userAccount, marketplaceId, productId);
 
             if(response.StatusCode == 200)
                 return Ok(response.Data);
@@ -30,9 +30,9 @@ public class ProductServiceController(IProductService _productService) : Control
     [HttpGet("get-all-products{marketplaceId}")]
         public async Task<ActionResult<List<GetProductDTO?>>> GetAllProducts(int marketplaceId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccount = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
-            var response = await _productService.GetAllProducts(userProfileId, marketplaceId);
+            var response = await _productService.GetAllProducts(userAccount, marketplaceId);
             
             if(response.StatusCode == 200)
                 return Ok(response.Data);
@@ -49,9 +49,9 @@ public class ProductServiceController(IProductService _productService) : Control
             var validationResult = validator.Validate(productDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString()); 
 
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccount = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _productService.CreateProduct(userProfileId, marketplaceId, productDTO);
+            var response = await _productService.CreateProduct(userAccount, marketplaceId, productDTO);
 
             if(response.StatusCode == 200)
                 return Ok(response.Errors);
@@ -64,9 +64,9 @@ public class ProductServiceController(IProductService _productService) : Control
     [HttpDelete("delete-product-by-id{marketplaceId}/{productId}")]
         public async Task<ActionResult<string>> DeleteProduct(int marketplaceId, int productId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);   
+            int userAccount = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);   
 
-            var response = await _productService.DeleteProduct(userProfileId, marketplaceId, productId);
+            var response = await _productService.DeleteProduct(userAccount, marketplaceId, productId);
             
             if(response.StatusCode == 200)
                 return Ok(response.Errors);
@@ -80,9 +80,9 @@ public class ProductServiceController(IProductService _productService) : Control
             var validationResult = validator.Validate(productDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString());
 
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccount = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _productService.UpdateProduct(userProfileId, productDTO);
+            var response = await _productService.UpdateProduct(userAccount, productDTO);
             if(response.StatusCode == 200)
                 return Ok(response.Errors);
             return BadRequest(response.Errors);

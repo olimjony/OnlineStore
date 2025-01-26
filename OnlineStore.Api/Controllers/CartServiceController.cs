@@ -16,9 +16,9 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
     [HttpGet("get-cart-by-id{cartId}")]
         public async Task<ActionResult<AllCartInfoDTO?>> GetCartById(int cartId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
-            var response = await _cartService.GetCartById(userProfileId, cartId);
+            var response = await _cartService.GetCartById(userAccountId, cartId);
 
             if(response.StatusCode == 200) return Ok(response.Data);
             else if(response.StatusCode == 400) return BadRequest(response.Errors);
@@ -28,9 +28,9 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
     [HttpGet("get-all-carts")]
         public async Task<ActionResult<List<GetCartDTO?>>> GetAllCarts()
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             
-            var response = await _cartService.GetAllCarts(userProfileId);
+            var response = await _cartService.GetAllCarts(userAccountId);
             
             if(response.StatusCode == 200) return Ok(response.Data);
             else return BadRequest(response.Errors);
@@ -43,10 +43,10 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
             var validationResult = validator.Validate(cartDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString()); 
 
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            Console.WriteLine(userProfileId);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            Console.WriteLine(userAccountId);
 
-            var response = await _cartService.CreateCart(userProfileId, cartDTO);
+            var response = await _cartService.CreateCart(userAccountId, cartDTO);
 
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
@@ -55,9 +55,9 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
     [HttpDelete("delete-cart-by-id{cartId}")]
         public async Task<ActionResult<string>> DeleteCart(int cartId)
         {
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _cartService.DeleteCart(userProfileId, cartId);
+            var response = await _cartService.DeleteCart(userAccountId, cartId);
             
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
@@ -70,9 +70,9 @@ public class CartServiceController(ICartService _cartService) : ControllerBase
             var validationResult = validator.Validate(cartDTO);
             if( !validationResult.IsValid) return BadRequest(validationResult.ToString());
 
-            int userProfileId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            int userAccountId = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var response = await _cartService.UpdateCart(userProfileId, cartDTO);
+            var response = await _cartService.UpdateCart(userAccountId, cartDTO);
             if(response.StatusCode == 200) return Ok(response.Errors);
             else return BadRequest(response.Errors);
         }
